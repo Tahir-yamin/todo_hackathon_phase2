@@ -14,6 +14,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
     description: '',
     priority: 'medium',
     due_date: '',
+    category: 'Personal',
+    tags: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
         description: '',
         priority: 'medium',
         due_date: '',
+        category: 'Personal',
+        tags: '',
       });
       onTaskCreated();
     } catch (err: any) {
@@ -49,16 +53,16 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Add New Task</h2>
+    <div className="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800 mb-8 transition-all duration-300 hover:shadow-2xl">
+      <h2 className="text-xl font-semibold mb-4 text-slate-200">Add New Task</h2>
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+        <div className="mb-4 p-3 bg-red-900/30 text-red-200 rounded-lg border border-red-800/50">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-1">
             Title *
           </label>
           <input
@@ -68,12 +72,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             value={formData.title}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-1">
             Description
           </label>
           <textarea
@@ -81,14 +85,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            rows={2}
+            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="priority" className="block text-sm font-medium text-slate-300 mb-1">
               Priority
             </label>
             <select
@@ -96,7 +100,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -105,27 +109,70 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
           </div>
 
           <div>
-            <label htmlFor="due_date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Due Date
+            <label htmlFor="category" className="block text-sm font-medium text-slate-300 mb-1">
+              Category
             </label>
-            <input
-              type="date"
-              id="due_date"
-              name="due_date"
-              value={formData.due_date}
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            />
+              className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
+            >
+              <option value="Personal">Personal</option>
+              <option value="Work">Work</option>
+              <option value="Learning">Learning</option>
+              <option value="Others">Others</option>
+            </select>
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="due_date" className="block text-sm font-medium text-slate-300 mb-1">
+            Due Date
+          </label>
+          <input
+            type="date"
+            id="due_date"
+            name="due_date"
+            value={formData.due_date}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="tags" className="block text-sm font-medium text-slate-300 mb-1">
+            Tags (comma separated)
+          </label>
+          <input
+            type="text"
+            id="tags"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            placeholder="e.g., urgent, review, important"
+            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
+          />
         </div>
 
         <div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="w-full flex justify-center py-3.5 px-6 rounded-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
           >
-            {loading ? 'Creating...' : 'Create Task'}
+            {loading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating...
+              </span>
+            ) : (
+              'Create Task'
+            )}
           </button>
         </div>
       </form>

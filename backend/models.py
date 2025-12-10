@@ -44,6 +44,8 @@ class TaskBase(SQLModel):
     priority: str = Field(default="medium", regex=r'^(low|medium|high)$')
     due_date: Optional[datetime] = Field(default=None)
     status: str = Field(default="pending", regex=r'^(pending|completed)$')
+    category: Optional[str] = Field(default="Personal", max_length=50)
+    tags: Optional[str] = Field(default="", max_length=500)
 
 
 class TaskCreate(TaskBase):
@@ -56,6 +58,8 @@ class TaskUpdate(SQLModel):
     priority: Optional[str] = Field(default=None, regex=r'^(low|medium|high)$')
     due_date: Optional[Union[datetime, str]] = Field(default=None)
     status: Optional[str] = Field(default=None, regex=r'^(pending|completed)$')
+    category: Optional[str] = Field(default=None, max_length=50)
+    tags: Optional[str] = Field(default=None, max_length=500)
 
 
 class Task(TaskBase, table=True):

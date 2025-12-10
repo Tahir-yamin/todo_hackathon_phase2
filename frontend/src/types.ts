@@ -9,6 +9,8 @@ export interface Task {
   created_at: string;
   updated_at: string;
   user_id: string;
+  category?: string;
+  tags?: string;
 }
 
 export interface TaskFormData {
@@ -16,4 +18,6 @@ export interface TaskFormData {
   description?: string;
   priority: 'low' | 'medium' | 'high';
   due_date?: string;
+  category?: string;
+  tags?: string;
 }

@@ -2,7 +2,6 @@ from sqlmodel import create_engine, Session
 from typing import Generator
 import os
 from dotenv import load_dotenv
-from backend import models  # Import models to register them with SQLModel
 from sqlmodel import SQLModel
 
 # Load environment variables from .env file
