@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { Task } from '@/types';
+import EditTaskModal from './EditTaskModal';
 
 interface TaskListProps {
   tasks: Task[];
@@ -10,7 +11,8 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
-  const [loadingTasks, setLoadingTasks] = useState<{[key: string]: boolean}>({});
+  const [loadingTasks, setLoadingTasks] = useState<{ [key: string]: boolean }>({});
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const toggleTaskStatus = async (task: Task) => {
     const newStatus = task.status === 'pending' ? 'completed' : 'pending';
@@ -43,6 +45,16 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
       console.error('Error deleting task:', err);
     } finally {
       setLoadingTasks(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  const handleEditSave = async (taskId: string, updates: Partial<Task>) => {
+    try {
+      await api.updateTask(taskId, updates);
+      onTaskUpdated();
+    } catch (err) {
+      console.error('Error updating task:', err);
+      throw err;
     }
   };
 
@@ -102,20 +114,18 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
           {tasks.map(task => (
             <div
               key={task.id}
-              className={`p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${
-                task.status === 'completed'
-                  ? 'bg-slate-900/70 border-slate-800 opacity-80'
-                  : 'bg-slate-900 border-slate-800 hover:border-slate-700'
-              }`}
+              className={`p-4 rounded-lg border transition-all duration-300 hover:shadow-lg hover:scale-[1.01] ${task.status === 'completed'
+                ? 'bg-slate-900/70 border-slate-800 opacity-80'
+                : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center mb-2">
-                    <h3 className={`text-base font-medium truncate ${
-                      task.status === 'completed'
-                        ? 'line-through text-slate-400'
-                        : 'text-slate-200'
-                    }`}>
+                    <h3 className={`text-base font-medium truncate ${task.status === 'completed'
+                      ? 'line-through text-slate-400'
+                      : 'text-slate-200'
+                      }`}>
                       {task.title}
                     </h3>
                     <span className={`ml-2 text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
@@ -143,11 +153,10 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
                         {formatDate(task.due_date)}
                       </span>
                     )}
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                      task.status === 'completed'
-                        ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                        : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                    }`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${task.status === 'completed'
+                      ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                      : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      }`}>
                       {task.status === 'completed' ? 'Completed' : 'Pending'}
                     </span>
                   </div>
@@ -155,13 +164,23 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
 
                 <div className="flex space-x-2 ml-4">
                   <button
+                    onClick={() => setEditingTask(task)}
+                    disabled={loadingTasks[task.id]}
+                    className="p-2 text-slate-400 hover:bg-blue-500/10 hover:text-blue-400 rounded-md border border-slate-700 disabled:opacity-50 transition-colors duration-200"
+                    title="Edit task"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+
+                  <button
                     onClick={() => toggleTaskStatus(task)}
                     disabled={loadingTasks[task.id]}
-                    className={`p-2 rounded-md ${
-                      task.status === 'completed'
-                        ? 'text-green-400 hover:bg-green-500/10 border border-green-500/20'
-                        : 'text-slate-400 hover:bg-slate-800 border border-slate-700'
-                    } disabled:opacity-50 transition-colors duration-200`}
+                    className={`p-2 rounded-md ${task.status === 'completed'
+                      ? 'text-green-400 hover:bg-green-500/10 border border-green-500/20'
+                      : 'text-slate-400 hover:bg-slate-800 border border-slate-700'
+                      } disabled:opacity-50 transition-colors duration-200`}
                     title={task.status === 'completed' ? 'Mark as pending' : 'Mark as complete'}
                   >
                     {loadingTasks[task.id] ? (
@@ -202,6 +221,15 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
             </div>
           ))}
         </div>
+      )}
+
+      {editingTask && (
+        <EditTaskModal
+          task={editingTask}
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          onSave={handleEditSave}
+        />
       )}
     </div>
   );

@@ -34,7 +34,11 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
     setError(null);
 
     try {
-      await api.createTask(formData);
+      const payload = {
+        ...formData,
+        due_date: formData.due_date ? new Date(formData.due_date).toISOString() : null,
+      };
+      await api.createTask(payload);
       setFormData({
         title: '',
         description: '',
@@ -45,7 +49,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
       });
       onTaskCreated();
     } catch (err: any) {
-      console.error('Error creating task:', err);
       setError(err.message || 'Failed to create task');
     } finally {
       setLoading(false);
@@ -53,44 +56,48 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
   };
 
   return (
-    <div className="bg-slate-900 p-6 rounded-xl shadow-xl border border-slate-800 mb-8 transition-all duration-300 hover:shadow-2xl">
-      <h2 className="text-xl font-semibold mb-4 text-slate-200">Add New Task</h2>
-      {error && (
-        <div className="mb-4 p-3 bg-red-900/30 text-red-200 rounded-lg border border-red-800/50">
-          {error}
-        </div>
-      )}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-1">
-            Title *
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
-          />
-        </div>
+    <div className="max-w-7xl mx-auto mb-8">
+      <form onSubmit={handleSubmit} className="bg-slate-900 rounded-lg p-6 shadow-lg border border-slate-800">
+        <h2 className="text-xl font-semibold text-slate-100 mb-4">Add New Task</h2>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-1">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={2}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
-          />
-        </div>
+        {error && (
+          <div className="mb-4 p-3 bg-red-900/20 border border-red-800 rounded text-red-300 text-sm">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter task title"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-1">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Enter task description"
+            />
+          </div>
+
           <div>
             <label htmlFor="priority" className="block text-sm font-medium text-slate-300 mb-1">
               Priority
@@ -100,7 +107,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
               name="priority"
               value={formData.priority}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -109,70 +116,60 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
           </div>
 
           <div>
+            <label htmlFor="due_date" className="block text-sm font-medium text-slate-300 mb-1">
+              Due Date
+            </label>
+            <input
+              type="date"
+              id="due_date"
+              name="due_date"
+              value={formData.due_date}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
             <label htmlFor="category" className="block text-sm font-medium text-slate-300 mb-1">
               Category
             </label>
-            <select
+            <input
+              type="text"
               id="category"
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
-            >
-              <option value="Personal">Personal</option>
-              <option value="Work">Work</option>
-              <option value="Learning">Learning</option>
-              <option value="Others">Others</option>
-            </select>
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g., Work, Personal"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="tags" className="block text-sm font-medium text-slate-300 mb-1">
+              Tags
+            </label>
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              value={formData.tags}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Comma-separated tags"
+            />
           </div>
         </div>
 
-        <div>
-          <label htmlFor="due_date" className="block text-sm font-medium text-slate-300 mb-1">
-            Due Date
-          </label>
-          <input
-            type="date"
-            id="due_date"
-            name="due_date"
-            value={formData.due_date}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="tags" className="block text-sm font-medium text-slate-300 mb-1">
-            Tags (comma separated)
-          </label>
-          <input
-            type="text"
-            id="tags"
-            name="tags"
-            value={formData.tags}
-            onChange={handleChange}
-            placeholder="e.g., urgent, review, important"
-            className="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-slate-200 transition-all duration-200"
-          />
-        </div>
-
-        <div>
+        <div className="mt-4">
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-3.5 px-6 rounded-lg text-base font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
+            className={`w-full md:w-auto px-6 py-2 rounded-lg font-medium transition-colors ${loading
+              ? 'bg-indigo-800 text-slate-400 cursor-not-allowed'
+              : 'bg-indigo-600 text-white hover:bg-indigo-500'
+              }`}
           >
-            {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating...
-              </span>
-            ) : (
-              'Create Task'
-            )}
+            {loading ? 'Creating...' : 'Add Task'}
           </button>
         </div>
       </form>

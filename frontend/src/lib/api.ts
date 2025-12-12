@@ -1,120 +1,83 @@
-const API_URL = 'http://localhost:8001';
+import { authClient } from './auth-client';
 
-// Helper function to get token from localStorage
-const getAuthToken = () => {
-  return localStorage.getItem('token');
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
 
-// Helper function to add auth headers to requests
-const getAuthHeaders = () => {
-  const token = getAuthToken();
+// Helper function to get auth headers with user ID
+const getAuthHeaders = async () => {
+  const session = await authClient.getSession();
+  const userId = session?.data?.user?.id;
+
   return {
     'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    ...(userId && { 'X-User-ID': userId }),
   };
 };
 
 export const api = {
   getTasks: async () => {
-    const res = await fetch(`${API_URL}/api/tasks`, {
-      headers: getAuthHeaders()
-    });
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/tasks/`, { headers }); // Added trailing slash
+
     if (!res.ok) {
       if (res.status === 401) {
-        // Redirect to login if unauthorized
         window.location.href = '/auth';
         throw new Error('Authentication required');
       }
-      throw new Error('Failed to fetch');
+      throw new Error('Failed to fetch tasks');
     }
     return res.json();
   },
 
   createTask: async (taskData: any) => {
-    const res = await fetch(`${API_URL}/api/tasks`, {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}/api/tasks/`, { // Added trailing slash
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers,
       body: JSON.stringify(taskData),
     });
+
     if (!res.ok) {
       if (res.status === 401) {
         window.location.href = '/auth';
         throw new Error('Authentication required');
       }
-      throw new Error('Failed to create');
+      throw new Error('Failed to create task');
     }
     return res.json();
   },
 
   updateTask: async (id: string, updates: any) => {
+    const headers = await getAuthHeaders();
     const res = await fetch(`${API_URL}/api/tasks/${id}`, {
       method: 'PUT',
-      headers: getAuthHeaders(),
+      headers,
       body: JSON.stringify(updates),
     });
+
     if (!res.ok) {
       if (res.status === 401) {
         window.location.href = '/auth';
         throw new Error('Authentication required');
       }
-      throw new Error('Failed to update');
+      throw new Error('Failed to update task');
     }
     return res.json();
   },
 
   deleteTask: async (id: string) => {
+    const headers = await getAuthHeaders();
     const res = await fetch(`${API_URL}/api/tasks/${id}`, {
       method: 'DELETE',
-      headers: getAuthHeaders()
+      headers,
     });
+
     if (!res.ok) {
       if (res.status === 401) {
         window.location.href = '/auth';
         throw new Error('Authentication required');
       }
-      throw new Error('Failed to delete');
+      throw new Error('Failed to delete task');
     }
     return res.json();
   },
-
-  // Authentication methods
-  login: async (email: string, password: string) => {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Login failed');
-    return data;
-  },
-
-  register: async (username: string, email: string, password: string) => {
-    const res = await fetch(`${API_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || 'Registration failed');
-    return data;
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-  },
-
-  getCurrentUser: () => {
-    const token = getAuthToken();
-    if (!token) return null;
-
-    try {
-      // Decode JWT token to get user info (simplified - in real app you'd verify the token properly)
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      return decoded;
-    } catch (error) {
-      return null;
-    }
-  }
 };

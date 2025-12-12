@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { signIn, signUp } from '@/lib/auth-client';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -42,17 +42,32 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      let result;
       if (isLogin) {
-        result = await api.login(email, password);
+        // Login with Better Auth
+        const result = await signIn.email({
+          email,
+          password,
+        });
+
+        if (result.error) {
+          setError(result.error.message || 'Login failed');
+          return;
+        }
       } else {
-        result = await api.register(username, email, password);
+        // Sign up with Better Auth
+        const result = await signUp.email({
+          email,
+          password,
+          name: username,
+        });
+
+        if (result.error) {
+          setError(result.error.message || 'Registration failed');
+          return;
+        }
       }
 
-      // Store token in localStorage
-      localStorage.setItem('token', result.access_token);
-
-      // Redirect to home page
+      // Redirect to home page on success
       router.push('/');
       router.refresh();
     } catch (err: any) {
@@ -167,11 +182,10 @@ const AuthPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-3 px-4 text-base font-semibold rounded-lg text-white transition duration-200 flex items-center justify-center ${
-                  loading
+                className={`w-full py-3 px-4 text-base font-semibold rounded-lg text-white transition duration-200 flex items-center justify-center ${loading
                     ? 'bg-red-400 cursor-not-allowed'
                     : 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:shadow-lg transform hover:-translate-y-0.5'
-                }`}
+                  }`}
               >
                 {loading ? (
                   <>

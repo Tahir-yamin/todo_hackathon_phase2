@@ -1,43 +1,39 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List, Union
+from sqlmodel import SQLModel, Field
+from typing import Optional
 from datetime import datetime
 import uuid
 
 
+# User models (for auth router compatibility)
 class UserBase(SQLModel):
-    username: str = Field(min_length=3, max_length=50, unique=True)
-    email: str = Field(regex=r'^[\w\.-]+@[\w\.-]+\.\w+$', unique=True)
+    username: str = Field(min_length=3, max_length=50)
+    email: str = Field(regex=r'^[\w\.-]+@[\w\.-]+\.\w+$')
 
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8)
 
 
-class UserUpdate(SQLModel):
-    username: Optional[str] = Field(default=None, min_length=3, max_length=50)
-    email: Optional[str] = Field(default=None, regex=r'^[\w\.-]+@[\w\.-]+\.\w+$')
-
-
 class User(UserBase, table=True):
     __tablename__ = "users"
-
+    
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     is_active: bool = Field(default=True)
 
-    # Relationship
-    tasks: List["Task"] = Relationship(back_populates="user")
 
-
-class UserPublic(UserBase):
+class UserPublic(SQLModel):
     id: uuid.UUID
+    username: str
+    email: str
     created_at: datetime
     updated_at: datetime
     is_active: bool
 
 
+# Task models
 class TaskBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=1000)
@@ -56,28 +52,25 @@ class TaskUpdate(SQLModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=1000)
     priority: Optional[str] = Field(default=None, regex=r'^(low|medium|high)$')
-    due_date: Optional[Union[datetime, str]] = Field(default=None)
+    due_date: Optional[datetime] = Field(default=None)
     status: Optional[str] = Field(default=None, regex=r'^(pending|completed)$')
     category: Optional[str] = Field(default=None, max_length=50)
     tags: Optional[str] = Field(default=None, max_length=500)
 
 
 class Task(TaskBase, table=True):
-    __tablename__ = "tasks"
+    __tablename__ = "Task"  # Match database table name
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    user_id: str  # Match Better Auth user table (TEXT not UUID)
     completed_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    # Relationship
-    user: "User" = Relationship(back_populates="tasks")
-
 
 class TaskPublic(TaskBase):
-    id: uuid.UUID
-    user_id: uuid.UUID
+    id: str
+    user_id: str
     completed_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime

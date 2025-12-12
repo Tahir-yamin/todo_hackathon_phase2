@@ -1,16 +1,15 @@
-from sqlmodel import create_engine, Session
+from sqlmodel import create_engine, Session, SQLModel
 from typing import Generator
 import os
 from dotenv import load_dotenv
-from sqlmodel import SQLModel
+import pathlib
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from backend/.env file
+backend_dir = pathlib.Path(__file__).parent
+load_dotenv(backend_dir / ".env")
 
 # Use DATABASE_URL from environment variables (should be PostgreSQL connection)
-DATABASE_URL = os.getenv(
-    "DATABASE_URL"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Validate that DATABASE_URL is set
 if not DATABASE_URL:
@@ -19,11 +18,13 @@ if not DATABASE_URL:
 # Create the engine for PostgreSQL
 engine = create_engine(DATABASE_URL)
 
-def get_session() -> Generator[Session, None, None]:
-    with Session(engine) as session:
-        yield session
-
 
 def create_db_and_tables():
-    """Create database tables based on models."""
+    """Create database tables."""
     SQLModel.metadata.create_all(engine)
+
+
+def get_session() -> Generator[Session, None, None]:
+    """Get database session."""
+    with Session(engine) as session:
+        yield session

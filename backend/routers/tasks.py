@@ -2,20 +2,16 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import List, Optional
 from sqlmodel import Session, select
 from datetime import datetime
-import uuid
 
 from backend.db import get_session
-from backend.models import (
-    Task, TaskCreate, TaskUpdate, TaskPublic,
-    User, UserPublic
-)
-from backend.auth import get_current_user
+from backend.models import Task, TaskCreate, TaskUpdate, TaskPublic
+from backend.auth import get_current_user, BetterAuthUser
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 @router.get("/", response_model=dict)
 def list_tasks(
-    current_user: User = Depends(get_current_user),
+    current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session),
     status: Optional[str] = Query(None, regex=r'^(all|pending|completed)$'),
     priority: Optional[str] = Query(None, regex=r'^(all|low|medium|high)$'),
@@ -93,7 +89,7 @@ def list_tasks(
 @router.post("/", response_model=dict)
 def create_task(
     task_data: TaskCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
     """
@@ -102,7 +98,7 @@ def create_task(
     # Create task instance with user_id
     task = Task(
         **task_data.dict(),
-        user_id=current_user.id
+        user_id=current_user.id  # Now both are strings
     )
 
     session.add(task)
@@ -118,8 +114,8 @@ def create_task(
 
 @router.get("/{id}", response_model=dict)
 def get_task(
-    id: uuid.UUID,
-    current_user: User = Depends(get_current_user),
+    id: str,  # Changed from uuid.UUID to str
+    current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
     """
@@ -142,13 +138,13 @@ def get_task(
 
 @router.put("/{id}", response_model=dict)
 def update_task(
-    id: uuid.UUID,
+    id: str,  # Changed from uuid.UUID to str
     task_data: TaskUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
     """
-    Update an existing task.
+    Update a specific task.
     """
     task = session.get(Task, id)
 
@@ -157,24 +153,21 @@ def update_task(
 
     # Verify that the task belongs to the current user
     if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to update this task")
-
-    # Prepare update data, excluding None values
-    update_data = task_data.dict(exclude_unset=True)
-
-    # Handle due_date conversion if it's a string
-    if 'due_date' in update_data and isinstance(update_data['due_date'], str):
-        try:
-            update_data['due_date'] = datetime.fromisoformat(update_data['due_date'].replace('Z', '+00:00'))
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid date format")
+        raise HTTPException(status_code=403, detail="Not authorized to access this task")
 
     # Update task fields
-    for field, value in update_data.items():
-        setattr(task, field, value)
+    task_dict = task_data.dict(exclude_unset=True)
+    for key, value in task_dict.items():
+        setattr(task, key, value)
 
     # Update the updated_at timestamp
     task.updated_at = datetime.utcnow()
+
+    # Handle status change to completed
+    if task_data.status == "completed" and task.status != "completed":
+        task.completed_at = datetime.utcnow()
+    elif task_data.status == "pending" and task.status == "completed":
+        task.completed_at = None
 
     session.add(task)
     session.commit()
@@ -189,8 +182,8 @@ def update_task(
 
 @router.delete("/{id}", response_model=dict)
 def delete_task(
-    id: uuid.UUID,
-    current_user: User = Depends(get_current_user),
+    id: str,  # Changed from uuid.UUID to str
+    current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
     """
@@ -203,7 +196,7 @@ def delete_task(
 
     # Verify that the task belongs to the current user
     if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this task")
+        raise HTTPException(status_code=403, detail="Not authorized to access this task")
 
     session.delete(task)
     session.commit()
