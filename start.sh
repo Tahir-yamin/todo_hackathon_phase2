@@ -30,8 +30,8 @@ done < backend/.env
 # CRITICAL FIX: Add current directory to Python path so 'import backend' works
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 
-# Run uvicorn from the root directory with the correct module path and port
-uvicorn backend.main:app --host 0.0.0.0 --port 8001 --reload &
+# Run backend from the root directory with the correct module path and port
+python -m backend.main &
 BACKEND_PID=$!
 sleep 5 # Wait for backend to initialize
 
@@ -43,13 +43,13 @@ if [ ! -d "node_modules" ]; then
     echo "Installing frontend dependencies..."
     npm install
 fi
-npx next dev -p 3001 &
+npx next dev -p 3002 &
 FRONTEND_PID=$!
 cd ..
 
 echo "Both services are running!"
-echo "Backend: http://localhost:8001"
-echo "Frontend: http://localhost:3001"
+echo "Backend: http://localhost:8002"
+echo "Frontend: http://localhost:3002"
 echo "Press Ctrl+C to stop."
 
 wait $BACKEND_PID $FRONTEND_PID
