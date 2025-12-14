@@ -1,97 +1,124 @@
-# Todo Application
+# Todo Application - Hackathon Project
 
-A full-stack todo application with a Python FastAPI backend and a React frontend.
+This repository contains implementations for both **Phase I** and **Phase II** of the hackathon challenge.
 
-## Prerequisites
+## 📁 Project Structure
 
+### Phase I: In-Memory Python Console App
+**Location**: [`phase1/`](phase1/)
+
+A simple CLI-based todo application using in-memory storage for learning and prototyping.
+
+**Features**:
+- Command-line interface
+- In-memory task storage
+- Basic CRUD operations
+- Interactive menu
+
+**Quick Start**:
+```bash
+cd phase1
+python interactive_cli.py
+```
+
+👉 **[Go to Phase I README](phase1/README.md)**
+
+---
+
+### Phase II: Full-Stack Web Application
+**Location**: [`phase2/`](phase2/)
+
+A production-ready web application with FastAPI backend, React frontend, and PostgreSQL database.
+
+**Features**:
+- User authentication
+- Database persistence
+- RESTful API
+- Modern React UI
+- Task filtering, priorities, due dates, tags
+
+**Quick Start**:
+```bash
+cd phase2
+./start.sh  # Linux/Mac/WSL
+# or
+.\start.ps1  # Windows PowerShell
+```
+
+**Access**:
+- Frontend: http://localhost:3002
+- Backend API: http://localhost:8002/docs
+
+👉 **[Go to Phase II README](phase2/README.md)**
+
+---
+
+## 🚀 Which Phase Should I Use?
+
+| Use Case | Recommended Phase |
+|----------|-------------------|
+| Learning Python CLI basics | **Phase I** |
+| Local prototyping/testing | **Phase I** |
+| Production web application | **Phase II** |
+| Multi-user system | **Phase II** |
+| Persistent data storage | **Phase II** |
+| REST API required | **Phase II** |
+
+## 📚 Documentation
+
+- **Phase I Documentation**: [`phase1/README.md`](phase1/README.md)
+- **Phase II Documentation**: [`phase2/README.md`](phase2/README.md)
+- **Phase II Startup Guide**: [`phase2/START_GUIDE.md`](phase2/START_GUIDE.md)
+- **Specifications**: [`specs/`](specs/)
+
+## 🎯 Hackathon Requirements
+
+### Phase I Requirements (Console App)
+- ✅ Add Task
+- ✅ Delete Task
+- ✅ Update Task 
+- ✅ View Task List
+- ✅ Mark as Complete
+- ✅ In-memory storage
+- ✅ CLI interface
+- ✅ Python 3.13+
+
+### Phase II Requirements (Full-Stack)
+- ✅ All Phase I features
+- ✅ Database persistence
+- ✅ User authentication
+- ✅ Web interface
+- ✅ RESTful API
+- ✅ Advanced filtering
+- ✅ Priority levels
+- ✅ Due dates & tags
+
+## 💻 Technology Stack
+
+### Phase I
 - Python 3.13+
-- Node.js 18+ (with npm)
+- Command-line interface
+- In-memory dictionary storage
 
-## Setup
+### Phase II
+**Backend:**
+- FastAPI
+- SQLModel
+- PostgreSQL
+- Better Auth
 
-### Backend Setup
+**Frontend:**
+- Next.js 14
+- React 18
+- TypeScript
+- Tailwind CSS
 
-1. Create and activate a Python virtual environment:
+## 📖 Getting Help
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+- **Phase I issues**: See [`phase1/README.md`](phase1/README.md)
+- **Phase II setup**: See [`phase2/START_GUIDE.md`](phase2/START_GUIDE.md)
+- **API documentation**: http://localhost:8002/docs (when Phase II is running)
 
-2. Install backend dependencies:
+## 📝 License
 
-```bash
-pip install -r backend/requirements.txt
-```
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-
-```bash
-cd frontend
-```
-
-2. Install frontend dependencies:
-
-```bash
-npm install
-```
-
-## Running the Application
-
-### Method 1: Using the start script (Recommended)
-
-Run the application using the provided start script that launches both the backend and frontend concurrently:
-
-```bash
-chmod +x start.sh
-./start.sh
-```
-
-The backend will be available at `http://localhost:8000` and the frontend at `http://localhost:3000`.
-
-### Method 2: Manual start
-
-1. **Start the backend:**
-
-```bash
-cd backend
-python main.py
-```
-
-The backend API will be available at `http://localhost:8000`.
-
-2. **Start the frontend:**
-
-In a new terminal window:
-
-```bash
-cd frontend
-npm run dev
-```
-
-The frontend will be available at `http://localhost:3000`.
-
-## API Documentation
-
-Once the backend is running, you can access the API documentation at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## Project Structure
-
-```
-.
-├── backend/              # FastAPI backend
-│   ├── main.py          # Main application entry point
-│   ├── db.py            # Database configuration
-│   ├── models.py        # Database models
-│   └── routers/         # API route handlers
-├── frontend/             # React frontend
-│   ├── src/             # Source code
-│   ├── package.json     # Frontend dependencies
-│   └── next.config.js   # Next.js configuration
-├── start.sh              # Script to start both backend and frontend
-└── README.md            # This file
-```
+This is a hackathon project for educational purposes.
