@@ -3,12 +3,13 @@
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { TaskFormData } from '@/types';
+import { SmartTaskInput } from './SmartTaskInput';
 
 interface TaskFormProps {
   onTaskCreated: () => void;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
+const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false }) => {
   const [formData, setFormData] = useState<TaskFormData>({
     title: '',
     description: '',
@@ -26,6 +27,28 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleAIParse = (parsedData: any) => {
+    // Convert ISO datetime to date input format (YYYY-MM-DD)
+    let dueDateValue = '';
+    if (parsedData.due_date) {
+      try {
+        const date = new Date(parsedData.due_date);
+        dueDateValue = date.toISOString().split('T')[0];
+      } catch (e) {
+        dueDateValue = '';
+      }
+    }
+
+    setFormData({
+      title: parsedData.title || '',
+      description: '',
+      priority: parsedData.priority || 'medium',
+      due_date: dueDateValue,
+      category: parsedData.category || 'Personal',
+      tags: parsedData.tags || '',
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +82,9 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
     <div className="max-w-7xl mx-auto mb-8">
       <form onSubmit={handleSubmit} className="bg-slate-900 rounded-lg p-6 shadow-lg border border-slate-800">
         <h2 className="text-xl font-semibold text-slate-100 mb-4">Add New Task</h2>
+
+        {/* AI-Powered Smart Input */}
+        <SmartTaskInput onParse={handleAIParse} />
 
         {error && (
           <div className="mb-4 p-3 bg-red-900/20 border border-red-800 rounded text-red-300 text-sm">

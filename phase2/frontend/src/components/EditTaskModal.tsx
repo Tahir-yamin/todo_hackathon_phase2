@@ -83,7 +83,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onClose, on
                                 <label className="block text-sm font-medium text-slate-300 mb-1">Priority</label>
                                 <select
                                     value={priority}
-                                    onChange={(e) => setPriority(e.target.value)}
+                                    onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
                                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="low">Low</option>

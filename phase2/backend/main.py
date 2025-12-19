@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.db import create_db_and_tables
-from backend.routers import tasks, auth
+from backend.routers import tasks, auth, ai
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,6 +31,7 @@ app.add_middleware(
 # Include the routers
 app.include_router(tasks.router)
 app.include_router(auth.router)
+app.include_router(ai.router)  # AI-powered features
 
 @app.get("/")
 def read_root():

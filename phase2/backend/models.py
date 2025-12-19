@@ -39,7 +39,7 @@ class TaskBase(SQLModel):
     description: Optional[str] = Field(default=None, max_length=1000)
     priority: str = Field(default="medium", regex=r'^(low|medium|high)$')
     due_date: Optional[datetime] = Field(default=None)
-    status: str = Field(default="pending", regex=r'^(pending|completed)$')
+    status: str = Field(default="todo", regex=r'^(todo|in_progress|completed)$')
     category: Optional[str] = Field(default="Personal", max_length=50)
     tags: Optional[str] = Field(default="", max_length=500)
 
@@ -53,7 +53,7 @@ class TaskUpdate(SQLModel):
     description: Optional[str] = Field(default=None, max_length=1000)
     priority: Optional[str] = Field(default=None, regex=r'^(low|medium|high)$')
     due_date: Optional[datetime] = Field(default=None)
-    status: Optional[str] = Field(default=None, regex=r'^(pending|completed)$')
+    status: Optional[str] = Field(default=None, regex=r'^(todo|in_progress|completed)$')
     category: Optional[str] = Field(default=None, max_length=50)
     tags: Optional[str] = Field(default=None, max_length=500)
 

@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 def list_tasks(
     current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session),
-    status: Optional[str] = Query(None, regex=r'^(all|pending|completed)$'),
+    status: Optional[str] = Query(None, regex=r'^(all|todo|in_progress|completed)$'),
     priority: Optional[str] = Query(None, regex=r'^(all|low|medium|high)$'),
     search: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
@@ -166,7 +166,7 @@ def update_task(
     # Handle status change to completed
     if task_data.status == "completed" and task.status != "completed":
         task.completed_at = datetime.utcnow()
-    elif task_data.status == "pending" and task.status == "completed":
+    elif task_data.status in ["todo", "in_progress"] and task.status == "completed":
         task.completed_at = None
 
     session.add(task)

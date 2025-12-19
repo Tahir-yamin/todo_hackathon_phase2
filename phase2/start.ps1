@@ -4,11 +4,11 @@
 Write-Host "Starting Todo Application..." -ForegroundColor Green
 
 # Set Python path to include parent directory
-$env:PYTHONPATH = "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
+$env:PYTHONPATH = $PSScriptRoot
 
 # Load environment variables from .env file
 Write-Host "Loading environment variables..." -ForegroundColor Yellow
-Get-Content "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\backend\.env" | ForEach-Object {
+Get-Content "$PSScriptRoot\backend\.env" | ForEach-Object {
     if ($_ -match '^([^#].+?)=(.*)$') {
         [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')
     }
@@ -17,8 +17,9 @@ Get-Content "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\backend\.env" |
 # Start Backend
 Write-Host "Starting backend server on port 8002..." -ForegroundColor Yellow
 $backendJob = Start-Job -ScriptBlock {
-    Set-Location "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
-    $env:PYTHONPATH = "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
+    param($scriptRoot)
+    Set-Location $scriptRoot
+    $env:PYTHONPATH = $scriptRoot
     
     # Load environment variables in the job
     Get-Content "backend\.env" | ForEach-Object {
@@ -28,16 +29,17 @@ $backendJob = Start-Job -ScriptBlock {
     }
     
     & "backend\venv\Scripts\python.exe" -m backend.main
-}
+} -ArgumentList $PSScriptRoot
 
 Start-Sleep -Seconds 5
 
 # Start Frontend
 Write-Host "Starting frontend server on port 3002..." -ForegroundColor Yellow
 $frontendJob = Start-Job -ScriptBlock {
-    Set-Location "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\frontend"
+    param($scriptRoot)
+    Set-Location "$scriptRoot\frontend"
     npm run dev -- -p 3002
-}
+} -ArgumentList $PSScriptRoot
 
 Start-Sleep -Seconds 3
 
