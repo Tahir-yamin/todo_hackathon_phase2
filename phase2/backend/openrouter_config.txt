@@ -1,4 +1,0 @@
-# OpenRouter API Configuration (Added for Phase III AI Chatbot)
-OPENROUTER_API_KEY=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
-SITE_URL=http://localhost:3000
-APP_NAME=TodoHackathon

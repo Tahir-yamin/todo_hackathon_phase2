@@ -32,7 +32,7 @@ c606d73e0119ad2ce68ca8b48172e66d25854bff4b6
 **Frontend** (`frontend/.env.local`):
 ```env
 DATABASE_URL=your-neon-postgresql-url
-BETTER_AUTH_SECRET=c606d73e0119ad2ce68ca8b48172e66d25854bff4b6
+BETTER_AUTH_SECRET=your_secret_key_here_generate_with_openssl_rand_hex_32
 NEXT_PUBLIC_APP_URL=http://localhost:3001
 NEXT_PUBLIC_API_URL=http://localhost:8001
 ```
@@ -40,7 +40,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8001
 **Backend** (`backend/.env`):
 ```env
 DATABASE_URL=your-neon-postgresql-url
-BETTER_AUTH_SECRET=c606d73e0119ad2ce68ca8b48172e66d25854bff4b6
+BETTER_AUTH_SECRET=your_secret_key_here_generate_with_openssl_rand_hex_32
 ```
 
 ### 2. Update Main Page

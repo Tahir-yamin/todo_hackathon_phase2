@@ -6,5 +6,30 @@ venv/
 .venv/
 __pycache__/
 *.pyc
-.env
 .DS_Store
+
+# Environment files - NEVER commit these!
+.env
+.env.local
+.env*.local
+.env.development
+.env.production
+*.env
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# API Keys and Secrets
+**/openrouter_config.txt
+**/api_keys.txt
+**/*secret*.txt
+**/*key*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
