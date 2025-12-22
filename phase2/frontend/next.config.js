@@ -1,20 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/tasks/:path*',
-        destination: 'http://127.0.0.1:8001/tasks/:path*',
-      },
-      {
-        source: '/health',
-        destination: 'http://127.0.0.1:8001/health',
-      },
-      {
-        source: '/',
-        destination: 'http://127.0.0.1:8001/',
-      }
-    ]
+  output: 'export',
+  basePath: process.env.NODE_ENV === 'production' ? '/todo_hackathon_phase2' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/todo_hackathon_phase2/' : '',
+  images: {
+    unoptimized: true,
   },
 }
 
