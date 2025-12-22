@@ -3,9 +3,9 @@ from sqlmodel import Session, select
 from datetime import timedelta
 import uuid
 
-from backend.db import get_session
-from backend.models import User, UserCreate
-from backend.auth import get_password_hash, verify_password, create_access_token
+from db import get_session
+from models import User, UserCreate
+from auth import get_password_hash, verify_password, create_access_token
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
