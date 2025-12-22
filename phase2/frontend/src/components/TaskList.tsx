@@ -14,7 +14,10 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
   const [loadingTasks, setLoadingTasks] = useState<{ [key: string]: boolean }>({});
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const toggleTaskStatus = async (task: Task) => {
+  const toggleTaskStatus = useCallback(async (task: Task) => {
+    // Prevent multiple rapid clicks
+    if (loadingTasks[task.id]) return;
+
     const newStatus = task.status === 'todo' ? 'completed' : 'todo';
     setLoadingTasks(prev => ({ ...prev, [task.id]: true }));
 
@@ -29,12 +32,15 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
     } finally {
       setLoadingTasks(prev => ({ ...prev, [task.id]: false }));
     }
-  };
+  }, [loadingTasks, onTaskUpdated]);
 
-  const deleteTask = async (id: string) => {
+  const deleteTask = useCallback(async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this task?')) {
       return;
     }
+
+    // Prevent multiple rapid clicks
+    if (loadingTasks[id]) return;
 
     setLoadingTasks(prev => ({ ...prev, [id]: true }));
 
@@ -46,9 +52,9 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
     } finally {
       setLoadingTasks(prev => ({ ...prev, [id]: false }));
     }
-  };
+  }, [loadingTasks, onTaskUpdated]);
 
-  const handleEditSave = async (taskId: string, updates: Partial<Task>) => {
+  const handleEditSave = useCallback(async (taskId: string, updates: Partial<Task>) => {
     try {
       await api.updateTask(taskId, updates);
       onTaskUpdated();
@@ -56,7 +62,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
       console.error('Error updating task:', err);
       throw err;
     }
-  };
+  }, [onTaskUpdated]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
