@@ -12,8 +12,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from pydantic import BaseModel
 
-from backend.db import get_session
-from backend.models import Conversation, Message
+from db import get_session
+from models import Conversation, Message
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ async def chat(
     """
     Stateless chat endpoint using Google Gemini with automatic function calling
     """
-    from backend.gemini_agent import run_agent
+    from gemini_agent import run_agent
     
     try:
         print(f"\n💬 Chat request from {user_id}: {request.message}")

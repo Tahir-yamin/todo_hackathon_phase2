@@ -3,9 +3,9 @@ from typing import List, Optional
 from sqlmodel import Session, select
 from datetime import datetime
 
-from backend.db import get_session
-from backend.models import Task, TaskCreate, TaskUpdate, TaskPublic
-from backend.auth import get_current_user, BetterAuthUser
+from db import get_session
+from models import Task, TaskCreate, TaskUpdate, TaskPublic
+from auth import get_current_user, BetterAuthUser
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 

@@ -3,20 +3,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-if not os.getenv("GEMINI_API_KEY"):
-    print("❌ CRITICAL: GEMINI_API_KEY is missing from environment!")
-    print("   Create backend/.env and add: GEMINI_API_KEY=your_key_here")
-else:
-    print("✅ GEMINI_API_KEY found in environment")
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
-from backend.db import create_db_and_tables
-from backend.routers import tasks, auth, ai, chat
-from backend.auth import get_current_user, BetterAuthUser
+# Relative imports for production deployment
+from db import create_db_and_tables
+from routers import tasks, auth, ai, chat
+from auth import get_current_user, BetterAuthUser
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,6 +32,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://frontend-seven-tawny-19.vercel.app",
         "http://localhost:3002",
         "http://127.0.0.1:3002",
         "*"  # Allow all for development
