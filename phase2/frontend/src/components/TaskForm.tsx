@@ -7,6 +7,7 @@ import { SmartTaskInput } from './SmartTaskInput';
 
 interface TaskFormProps {
   onTaskCreated: () => void;
+  inSidebar?: boolean;
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false }) => {
