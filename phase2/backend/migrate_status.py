@@ -5,8 +5,8 @@ Run this once to migrate from old status values to new ones.
 
 import asyncio
 from sqlmodel import Session, select
-from backend.db import engine
-from backend.models import Task
+from db import engine
+from models import Task
 
 
 async def migrate_task_status():
