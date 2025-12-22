@@ -28,18 +28,21 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware - Allow Vercel frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://frontend-seven-tawny-19.vercel.app",
+        # Production Vercel domains
+        "https://frontend-jfow84jhy-tahir-yamins-projects.vercel.app",
+        "https://frontend-git-main-tahir-yamins-projects.vercel.app",
+        # Development
         "http://localhost:3002",
         "http://127.0.0.1:3002",
-        "*"  # Allow all for development
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include the routers
