@@ -28,11 +28,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware - Temporarily allow all for debugging
+# Add CORS middleware - Allow specific Vercel frontend
+frontend_url = os.getenv("FRONTEND_URL", "https://frontend-seven-tawny-19.vercel.app")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporarily allow all - will restrict after testing
-    allow_credentials=False,  # Must be False when using wildcard
+    allow_origins=[frontend_url, "https://frontend-seven-tawny-19.vercel.app"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
