@@ -293,9 +293,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     <div className="opacity-50 rotate-2 scale-105">
                         <TaskCard
                             task={activeTask}
-                            onDelete={() => { }}
-                            onEdit={() => { }}
-                            onToggleComplete={() => { }}
+                            onDelete={async (id) => { }}
+                            onEdit={(task) => { }}
+                            onToggleComplete={async (id) => { }}
                         />
                     </div>
                 ) : null}
