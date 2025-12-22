@@ -182,26 +182,28 @@ def update_task(
 
 @router.delete("/{id}", response_model=dict)
 def delete_task(
-    id: str,  # Changed from uuid.UUID to str
+    id: str,
     current_user: BetterAuthUser = Depends(get_current_user),
     session: Session = Depends(get_session)
 ):
     """
     Delete a specific task.
     """
-    task = session.get(Task, id)
-
+    # Find task by ID and verify ownership
+    task = session.exec(
+        select(Task).where(Task.id == id).where(Task.user_id == current_user.id)
+    ).first()
+    
     if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    # Verify that the task belongs to the current user
-    if task.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this task")
-
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found or you don't have permission to delete it"
+        )
+    
     session.delete(task)
     session.commit()
-
+    
     return {
         "success": True,
-        "message": "Task deleted successfully"
+        "message": f"Task '{task.title}' deleted successfully"
     }

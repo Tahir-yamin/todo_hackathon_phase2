@@ -1,9 +1,22 @@
+# Load environment variables FIRST
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+if not os.getenv("GEMINI_API_KEY"):
+    print("❌ CRITICAL: GEMINI_API_KEY is missing from environment!")
+    print("   Create backend/.env and add: GEMINI_API_KEY=your_key_here")
+else:
+    print("✅ GEMINI_API_KEY found in environment")
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 from backend.db import create_db_and_tables
-from backend.routers import tasks, auth, ai
+from backend.routers import tasks, auth, ai, chat
+from backend.auth import get_current_user, BetterAuthUser
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,7 +35,11 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=[
+        "http://localhost:3002",
+        "http://127.0.0.1:3002",
+        "*"  # Allow all for development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,6 +49,7 @@ app.add_middleware(
 app.include_router(tasks.router)
 app.include_router(auth.router)
 app.include_router(ai.router)  # AI-powered features
+app.include_router(chat.router)  # Phase 3: AI Chatbot
 
 @app.get("/")
 def read_root():

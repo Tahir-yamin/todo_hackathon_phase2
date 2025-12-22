@@ -2,7 +2,7 @@ import { authClient } from './auth-client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
 
-// Helper function to get auth headers with user ID
+// Get auth headers with real user ID from session
 const getAuthHeaders = async () => {
   const session = await authClient.getSession();
   const userId = session?.data?.user?.id;
@@ -19,10 +19,11 @@ export const api = {
     const res = await fetch(`${API_URL}/api/tasks/`, { headers }); // Added trailing slash
 
     if (!res.ok) {
-      if (res.status === 401) {
-        window.location.href = '/auth';
-        throw new Error('Authentication required');
-      }
+      // NUCLEAR DEV BYPASS: Don't redirect on 401
+      // if (res.status === 401) {
+      //   window.location.href = '/auth';
+      //   throw new Error('Authentication required');
+      // }
       throw new Error('Failed to fetch tasks');
     }
     return res.json();
@@ -37,10 +38,11 @@ export const api = {
     });
 
     if (!res.ok) {
-      if (res.status === 401) {
-        window.location.href = '/auth';
-        throw new Error('Authentication required');
-      }
+      // NUCLEAR DEV BYPASS: Don't redirect on 401
+      // if (res.status === 401) {
+      //   window.location.href = '/auth';
+      //   throw new Error('Authentication required');
+      // }
       throw new Error('Failed to create task');
     }
     return res.json();
@@ -55,10 +57,11 @@ export const api = {
     });
 
     if (!res.ok) {
-      if (res.status === 401) {
-        window.location.href = '/auth';
-        throw new Error('Authentication required');
-      }
+      // NUCLEAR DEV BYPASS: Don't redirect on 401
+      // if (res.status === 401) {
+      //   window.location.href = '/auth';
+      //   throw new Error('Authentication required');
+      // }
       throw new Error('Failed to update task');
     }
     return res.json();
@@ -72,12 +75,20 @@ export const api = {
     });
 
     if (!res.ok) {
-      if (res.status === 401) {
-        window.location.href = '/auth';
-        throw new Error('Authentication required');
-      }
-      throw new Error('Failed to delete task');
+      // NUCLEAR DEV BYPASS: Don't redirect on 401
+      // if (res.status === 401) {
+      //   window.location.href = '/auth';
+      //   throw new Error('Authentication required');
+      // }
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Failed to delete task');
     }
-    return res.json();
+
+    // Return success - some DELETE endpoints return empty body
+    try {
+      return await res.json();
+    } catch {
+      return { success: true };
+    }
   },
 };

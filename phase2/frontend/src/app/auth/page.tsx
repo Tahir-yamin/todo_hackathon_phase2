@@ -42,17 +42,27 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
+      console.log('=== LOGIN ATTEMPT START ===');
+      console.log('Email:', email);
       if (isLogin) {
         // Login with Better Auth
+        console.log('Calling signIn.email...');
         const result = await signIn.email({
           email,
           password,
         });
 
+        console.log('signIn.email result:', result);
+        console.log('result.error:', result.error);
+        console.log('result.data:', result.data);
+
         if (result.error) {
+          console.error('Login error detected:', result.error);
           setError(result.error.message || 'Login failed');
           return;
         }
+
+        console.log('No error, attempting redirect...');
       } else {
         // Sign up with Better Auth
         const result = await signUp.email({
@@ -68,9 +78,12 @@ const AuthPage = () => {
       }
 
       // Redirect to home page on success
-      router.push('/');
-      router.refresh();
+      console.log('Redirecting to home page...');
+      // Use window.location.href for full page reload to ensure session cookie is read
+      window.location.href = '/';
+      console.log('=== LOGIN ATTEMPT END ===');
     } catch (err: any) {
+      console.error('=== CAUGHT ERROR ===', err);
       setError(err.message || 'An error occurred during authentication');
     } finally {
       setLoading(false);
@@ -183,8 +196,8 @@ const AuthPage = () => {
                 type="submit"
                 disabled={loading}
                 className={`w-full py-3 px-4 text-base font-semibold rounded-lg text-white transition duration-200 flex items-center justify-center ${loading
-                    ? 'bg-red-400 cursor-not-allowed'
-                    : 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:shadow-lg transform hover:-translate-y-0.5'
+                  ? 'bg-red-400 cursor-not-allowed'
+                  : 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 hover:shadow-lg transform hover:-translate-y-0.5'
                   }`}
               >
                 {loading ? (

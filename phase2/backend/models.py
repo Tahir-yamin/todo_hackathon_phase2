@@ -74,3 +74,23 @@ class TaskPublic(TaskBase):
     completed_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
+
+# Conversation models (Phase 3: AI Chatbot)
+class Conversation(SQLModel, table=True):
+    __tablename__ = 'conversations'
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: str = Field(index=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Message(SQLModel, table=True):
+    __tablename__ = 'messages'
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    conversation_id: int = Field(foreign_key='conversations.id', index=True)
+    user_id: str = Field(index=True)
+    role: str = Field()  # 'user' or 'model'
+    content: str = Field()
+    created_at: datetime = Field(default_factory=datetime.utcnow)

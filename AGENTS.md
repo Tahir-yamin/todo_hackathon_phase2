@@ -278,6 +278,31 @@ If a conflict arises between spec files, the hierarchy is:
 
 ---
 
-**Last Updated**: 2025-12-19  
-**Phase**: Phase II Complete, preparing for Phase III  
+## Browser Testing Best Practices
+
+### ⚠️ CRITICAL: Always Clear Input Fields
+
+When using the browser agent to test forms, **ALWAYS use `ClearText: true`** for input operations:
+
+```
+# CORRECT - Clears field before typing
+browser_input(Index=1, Text="user@example.com", ClearText=true)
+
+# WRONG - Appends to existing text causing concatenation bugs
+browser_input(Index=1, Text="user@example.com")
+```
+
+### Why This Matters
+- Fields may have autofill data
+- Previous failed attempts leave text in fields
+- Concatenated text causes "Invalid email or password" errors
+- Debugging becomes difficult when you can't see the actual values
+
+### Workflow Reference
+See `.agent/workflows/browser-testing.md` for complete testing guidelines.
+
+---
+
+**Last Updated**: 2025-12-21  
+**Phase**: Phase II Complete, Phase III in progress  
 **Hackathon**: "Evolution of Todo - Mastering Spec-Driven Development & Cloud Native AI"

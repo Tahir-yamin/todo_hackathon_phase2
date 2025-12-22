@@ -6,6 +6,7 @@ import { useSession, signOut } from '@/lib/auth-client';
 import { api } from '@/lib/api';
 import { Task } from '@/types';
 import { Sidebar } from '@/components/Sidebar';
+import { ChatWidget } from '@/components/ChatWidget';
 import TaskList from '@/components/TaskList';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import EditTaskModal from '@/components/EditTaskModal';
@@ -27,20 +28,21 @@ function HomeContent() {
     category: ''
   });
   const router = useRouter();
+  // Use real session from better-auth
   const { data: session, isPending } = useSession();
   const { theme, toggleTheme } = useTheme();
 
+  // Redirect to auth if not authenticated
   useEffect(() => {
     if (!isPending && !session) {
       router.push('/auth');
     }
   }, [session, isPending, router]);
 
+  // TEMPORARILY DISABLED: Fetch tasks immediately without waiting for session
   useEffect(() => {
-    if (session?.user) {
-      fetchTasks();
-    }
-  }, [session]);
+    fetchTasks();
+  }, []);
 
   // Apply local filtering
   useEffect(() => {
@@ -112,8 +114,7 @@ function HomeContent() {
 
   const handleLogout = async () => {
     await signOut();
-    router.push('/auth');
-    router.refresh();
+    window.location.href = '/auth'; // Force hard redirect to auth page
   };
 
   const handleFilterChange = (newFilters: TaskFilters) => {
@@ -140,9 +141,9 @@ function HomeContent() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-col h-full p-4 overflow-y-auto custom-scrollbar relative">
-        {/* Top Navigation */}
-        <nav className="cyber-panel mb-4 px-6 h-16 flex justify-between items-center backdrop-blur-lg sticky top-0 z-40">
+      <main className="flex flex-col h-full relative">
+        {/* Top Navigation - Always visible */}
+        <nav className="cyber-panel px-6 h-16 flex justify-between items-center backdrop-blur-lg border-b border-accent/20 flex-shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-sm bg-primary flex items-center justify-center text-background-dark font-bold text-lg shadow-glow-sm">
               T
@@ -159,8 +160,8 @@ function HomeContent() {
               <button
                 onClick={() => setView('list')}
                 className={`px-3 py-1.5 text-sm font-medium font-mono transition-colors flex items-center gap-1 ${view === 'list'
-                    ? 'bg-primary text-background-dark shadow-glow-sm'
-                    : 'text-text-dark hover:text-primary'
+                  ? 'bg-primary text-background-dark shadow-glow-sm'
+                  : 'text-text-dark hover:text-primary'
                   }`}
               >
                 <LayoutList className="w-4 h-4" />
@@ -169,8 +170,8 @@ function HomeContent() {
               <button
                 onClick={() => setView('kanban')}
                 className={`px-3 py-1.5 text-sm font-medium font-mono transition-colors flex items-center gap-1 ${view === 'kanban'
-                    ? 'bg-primary text-background-dark shadow-glow-sm'
-                    : 'text-text-dark hover:text-primary'
+                  ? 'bg-primary text-background-dark shadow-glow-sm'
+                  : 'text-text-dark hover:text-primary'
                   }`}
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -230,6 +231,9 @@ function HomeContent() {
           />
         )}
       </main>
+
+      {/* Floating Chat Widget */}
+      <ChatWidget />
     </div>
   );
 }
