@@ -53,7 +53,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     );
 
     // Group tasks by status
-    const todoTasks = tasks.filter(t => t.status === 'pending');
+    const todoTasks = tasks.filter(t => t.status === 'todo');
     const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
     const doneTasks = tasks.filter(t => t.status === 'completed');
 
