@@ -28,18 +28,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware - Allow Vercel frontend
+# Add CORS middleware - Temporarily allow all for debugging
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        # Production Vercel domains
-        "https://frontend-jfow84jhy-tahir-yamins-projects.vercel.app",
-        "https://frontend-git-main-tahir-yamins-projects.vercel.app",
-        # Development
-        "http://localhost:3002",
-        "http://127.0.0.1:3002",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],  # Temporarily allow all - will restrict after testing
+    allow_credentials=False,  # Must be False when using wildcard
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
