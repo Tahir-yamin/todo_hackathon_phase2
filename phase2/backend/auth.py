@@ -5,7 +5,7 @@ from fastapi import HTTPException, Depends, Request, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
 from sqlmodel import Session, select, SQLModel, Field
-from backend.db import get_session
+from db import get_session
 import os
 
 # Simple User model matching Better Auth's user table
