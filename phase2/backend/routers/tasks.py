@@ -72,43 +72,63 @@ def list_tasks(
     sort: str = Query("created_at"),
     order: str = Query("desc")
 ):
-    user_id = "hackathon-demo-user"
-    # Ensure user exists before query to prevent issues
-    ensure_demo_user(session, user_id)
-    
-    query = select(Task).where(Task.user_id == user_id)
+    try:
+        user_id = "hackathon-demo-user"
+        # Ensure user exists before query to prevent issues
+        ensure_demo_user(session, user_id)
+        
+        query = select(Task).where(Task.user_id == user_id)
 
-    if status and status != "all":
-        query = query.where(Task.status == status)
-    if priority and priority != "all":
-        query = query.where(Task.priority == priority)
-    if search:
-        query = query.where(Task.title.contains(search))
+        if status and status != "all":
+            query = query.where(Task.status == status)
+        if priority and priority != "all":
+            query = query.where(Task.priority == priority)
+        if search:
+            query = query.where(Task.title.contains(search))
 
-    if order == "desc":
-        query = query.order_by(getattr(Task, sort).desc())
-    else:
-        query = query.order_by(getattr(Task, sort).asc())
+        if order == "desc":
+            query = query.order_by(getattr(Task, sort).desc())
+        else:
+            query = query.order_by(getattr(Task, sort).asc())
 
-    offset = (page - 1) * limit
-    tasks = session.exec(query.offset(offset).limit(limit)).all()
-    
-    return {"success": True, "data": {"tasks": tasks}}
+        offset = (page - 1) * limit
+        tasks = session.exec(query.offset(offset).limit(limit)).all()
+        
+        return {"success": True, "data": {"tasks": tasks}}
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"❌ ERROR in list_tasks")
+        print(f"Error: {str(e)}")
+        print(f"Traceback:\n{error_details}")
+        print(f"{'='*60}\n")
+        raise HTTPException(status_code=500, detail=f"Task list error: {str(e)}")
 
 @router.post("")
 def create_task(
     task_data: TaskCreate,
     session: Session = Depends(get_session)
 ):
-    user_id = "hackathon-demo-user"
-    ensure_demo_user(session, user_id)
-    
-    task = Task(**task_data.dict(), user_id=user_id)
-    session.add(task)
-    session.commit()
-    session.refresh(task)
-    
-    return {"success": True, "data": task, "message": "Task created successfully"}
+    try:
+        user_id = "hackathon-demo-user"
+        ensure_demo_user(session, user_id)
+        
+        task = Task(**task_data.dict(), user_id=user_id)
+        session.add(task)
+        session.commit()
+        session.refresh(task)
+        
+        return {"success": True, "data": task, "message": "Task created successfully"}
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"❌ ERROR in create_task")
+        print(f"Error: {str(e)}")
+        print(f"Traceback:\n{error_details}")
+        print(f"{'='*60}\n")
+        raise HTTPException(status_code=500, detail=f"Task creation error: {str(e)}")
 
 @router.put("/{id}")
 def update_task(
