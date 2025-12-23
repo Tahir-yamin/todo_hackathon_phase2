@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Header
 from typing import Optional
 from sqlmodel import Session, select
 from datetime import datetime
@@ -53,10 +53,12 @@ def list_tasks(
     page: int = Query(1),
     limit: int = Query(10),
     sort: str = Query("created_at"),
-    order: str = Query("desc")
+    order: str = Query("desc"),
+    x_user_id: Optional[str] = Header(None)
 ):
     try:
-        user_id = "hackathon-demo-user"
+        # Use header user_id if provided, otherwise fall back to demo user
+        user_id = x_user_id if x_user_id else "hackathon-demo-user"
         # Ensure user exists before query to prevent issues
         ensure_demo_user(session, user_id)
         
@@ -91,10 +93,12 @@ def list_tasks(
 @router.post("")
 def create_task(
     task_data: TaskCreate,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    x_user_id: Optional[str] = Header(None)
 ):
     try:
-        user_id = "hackathon-demo-user"
+        # Use header user_id if provided, otherwise fall back to demo user
+        user_id = x_user_id if x_user_id else "hackathon-demo-user"
         ensure_demo_user(session, user_id)
         
         task = Task(**task_data.dict(), user_id=user_id)
@@ -147,3 +151,45 @@ def delete_task(
     session.commit()
     
     return {"success": True, "message": "Task deleted"}
+
+@router.post("/bulk-complete")
+def bulk_complete_tasks(
+    session: Session = Depends(get_session),
+    x_user_id: Optional[str] = Header(None)
+):
+    """Complete all incomplete tasks for the user"""
+    try:
+        # Use header user_id if provided, otherwise fall back to demo user
+        user_id = x_user_id if x_user_id else "hackathon-demo-user"
+        
+        # Get all incomplete tasks for this user
+        statement = select(Task).where(
+            Task.user_id == user_id,
+            Task.status != "completed"
+        )
+        tasks = session.exec(statement).all()
+        
+        # Mark each as completed
+        for task in tasks:
+            task.status = "completed"
+            task.updated_at = datetime.utcnow()
+            session.add(task)
+        
+        session.commit()
+        
+        print(f"✅ Bulk completed {len(tasks)} tasks for user {user_id}")
+        
+        return {
+            "success": True,
+            "count": len(tasks),
+            "message": f"Marked {len(tasks)} tasks as completed"
+        }
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"\n{'='*60}")
+        print(f"❌ ERROR in bulk_complete_tasks")
+        print(f"Error: {str(e)}")
+        print(f"Traceback:\n{error_details}")
+        print(f"{'='*60}\n")
+        raise HTTPException(status_code=500, detail=f"Bulk complete error: {str(e)}")

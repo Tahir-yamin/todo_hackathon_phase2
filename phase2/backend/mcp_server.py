@@ -119,6 +119,17 @@ class MCPServer:
                         "required": ["task_id"]
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "bulk_complete_tasks",
+                    "description": "Mark ALL incomplete tasks as completed. Use this when user asks to 'complete all tasks', 'mark everything as done', or similar bulk operations.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                    }
+                }
             }
         ]
     
@@ -139,6 +150,8 @@ class MCPServer:
                 return await self._update_task(session, arguments, user_id)
             elif tool_name == "delete_task":
                 return await self._delete_task(session, arguments, user_id)
+            elif tool_name == "bulk_complete_tasks":
+                return await self._bulk_complete_tasks(session, user_id)
             else:
                 return {"success": False, "error": f"Unknown tool: {tool_name}"}
         except Exception as e:
