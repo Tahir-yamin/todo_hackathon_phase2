@@ -1,4 +1,5 @@
 # Load environment variables FIRST
+# Force redeploy: Dec 23, 2025 - CORS + Trailing slash fixes
 from dotenv import load_dotenv
 load_dotenv()
 
