@@ -30,14 +30,18 @@ app = FastAPI(
 
 # Add CORS middleware - Allow specific Vercel frontend
 frontend_url = os.getenv("FRONTEND_URL", "https://frontend-seven-tawny-19.vercel.app")
+print(f"🔧 DEBUG: Configuring CORS for origin: {frontend_url}")
+print(f"🔧 DEBUG: Type of frontend_url: {type(frontend_url)}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url, "https://frontend-seven-tawny-19.vercel.app"],
+    allow_origins=[frontend_url] if frontend_url else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
+print(f"✅ DEBUG: CORS configured successfully")
 
 # Include the routers
 app.include_router(tasks.router)
