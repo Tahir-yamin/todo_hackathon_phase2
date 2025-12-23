@@ -1,39 +1,43 @@
-from sqlmodel import SQLModel, Field
-from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, List
 from datetime import datetime
 import uuid
 
 
-# User models (for auth router compatibility)
-class UserBase(SQLModel):
-    username: str = Field(min_length=3, max_length=50)
-    email: str = Field(regex=r'^[\w\.-]+@[\w\.-]+\.\w+$')
+# ============================================================================
+# USER MODELS - Single Source of Truth for BetterAuth Integration
+# ============================================================================
 
-
-class UserCreate(UserBase):
-    password: str = Field(min_length=8)
-
-
-class User(UserBase, table=True):
+class User(SQLModel, table=True):
+    """
+    User model compatible with BetterAuth.
+    Uses 'users' (plural) to avoid PostgreSQL 'user' reserved keyword.
+    """
     __tablename__ = "users"
     
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    hashed_password: str
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-    is_active: bool = Field(default=True)
+    id: str = Field(primary_key=True)
+    email: str = Field(unique=True, index=True)
+    name: str
+    emailVerified: bool = False
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    tasks: List["Task"] = Relationship(back_populates="user")
 
 
 class UserPublic(SQLModel):
-    id: uuid.UUID
-    username: str
+    """Public user representation (no sensitive data)"""
+    id: str
+    name: str
     email: str
-    created_at: datetime
-    updated_at: datetime
-    is_active: bool
+    createdAt: datetime
 
 
-# Task models
+# ============================================================================
+# TASK MODELS
+# ============================================================================
+
 class TaskBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=1000)
@@ -59,13 +63,16 @@ class TaskUpdate(SQLModel):
 
 
 class Task(TaskBase, table=True):
-    __tablename__ = "Task"  # Match database table name
+    __tablename__ = "tasks"
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    user_id: str  # Match Better Auth user table (TEXT not UUID)
+    user_id: str = Field(foreign_key="users.id", index=True)
     completed_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Relationships
+    user: Optional[User] = Relationship(back_populates="tasks")
 
 
 class TaskPublic(TaskBase):
@@ -75,12 +82,16 @@ class TaskPublic(TaskBase):
     created_at: datetime
     updated_at: datetime
 
-# Conversation models (Phase 3: AI Chatbot)
+
+# ============================================================================
+# CONVERSATION MODELS (Phase 3: AI Chatbot)
+# ============================================================================
+
 class Conversation(SQLModel, table=True):
     __tablename__ = 'conversations'
     
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: str = Field(index=True)
+    user_id: str = Field(foreign_key="users.id", index=True)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -90,20 +101,7 @@ class Message(SQLModel, table=True):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     conversation_id: int = Field(foreign_key='conversations.id', index=True)
-    user_id: str = Field(index=True)
+    user_id: str = Field(foreign_key="users.id", index=True)
     role: str = Field()  # 'user' or 'model'
     content: str = Field()
     created_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-# BetterAuth User table model (for demo user auto-creation)
-class User(SQLModel, table=True):
-    __tablename__ = "user"  # Must match BetterAuth table name
-    
-    id: str = Field(primary_key=True)
-    email: str
-    name: str
-    emailVerified: bool = False
-    createdAt: datetime = Field(default_factory=datetime.utcnow)
-    updatedAt: datetime = Field(default_factory=datetime.utcnow)
-

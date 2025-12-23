@@ -21,7 +21,10 @@ from models import User, Task, Conversation, Message  # Import all models for ta
 async def lifespan(app: FastAPI):
     # Create database tables on startup
     create_db_and_tables()
-    # NOTE: Removed SQLModel.metadata.create_all() to avoid conflicts with BetterAuth schema
+    
+    # NOW SAFE: Create all tables with clean model definitions
+    SQLModel.metadata.create_all(engine)
+    print("✅ All database tables created/verified")
     print("✅ Database connection established")
     yield
 
