@@ -61,7 +61,7 @@ def ensure_demo_user(session: Session, user_id: str):
         except Exception as e2:
             print(f"⚠️ Critical: Could not create user in 'user' or 'users' table. DB Error: {e2}")
 
-@router.get("/")
+@router.get("")
 def list_tasks(
     session: Session = Depends(get_session),
     status: Optional[str] = Query(None),
@@ -95,7 +95,7 @@ def list_tasks(
     
     return {"success": True, "data": {"tasks": tasks}}
 
-@router.post("/")
+@router.post("")
 def create_task(
     task_data: TaskCreate,
     session: Session = Depends(get_session)

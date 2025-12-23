@@ -14,6 +14,7 @@ from sqlmodel import SQLModel
 from db import create_db_and_tables, engine
 from routers import tasks, auth, ai, chat
 from auth import get_current_user, BetterAuthUser
+from models import User, Task, Conversation, Message  # Import all models for table creation
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
