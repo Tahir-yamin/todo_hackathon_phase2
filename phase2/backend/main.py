@@ -43,8 +43,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
+    max_age=3600,  # Cache preflight for 1 hour to prevent 502s
 )
 print(f"✅ DEBUG: CORS configured with wildcard - demo mode active")
+
+# Request logging middleware to debug 502 errors
+@app.middleware("http")
+async def log_requests(request, call_next):
+    print(f"📥 {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
+    response = await call_next(request)
+    print(f"📤 {request.method} {request.url.path} → {response.status_code}")
+    return response
 
 # Include the routers
 app.include_router(tasks.router)
