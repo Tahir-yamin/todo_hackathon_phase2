@@ -46,14 +46,14 @@ class MCPServer:
                 "type": "function",
                 "function": {
                     "name": "list_tasks",
-                    "description": "List all tasks with optional filters",
+                    "description": "List tasks. IMPORTANT: By default, show only PENDING tasks (status='todo' or 'in_progress'). Only show 'completed' tasks if the user explicitly asks for 'all tasks', 'completed tasks', 'finished tasks', or 'history'.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "status": {
                                 "type": "string",
                                 "enum": ["todo", "in_progress", "completed"],
-                                "description": "Filter by task status"
+                                "description": "Filter by task status. Default to 'todo' for pending tasks"
                             },
                             "priority": {
                                 "type": "string",
@@ -294,10 +294,10 @@ class MCPServer:
     async def _bulk_complete_tasks(self, session: Session, user_id: str) -> dict:
         """Mark all incomplete tasks as completed"""
         try:
-            # Get all incomplete tasks for this user
+            # Get all active tasks (both 'todo' and 'in_progress') for this user
             statement = select(Task).where(
                 Task.user_id == user_id,
-                Task.status != "completed"
+                Task.status.in_(["todo", "in_progress"])  # Catch all active tasks
             )
             tasks = session.exec(statement).all()
             
