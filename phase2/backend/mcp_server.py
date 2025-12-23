@@ -290,6 +290,35 @@ class MCPServer:
         except Exception as e:
             session.rollback()
             raise
+    
+    async def _bulk_complete_tasks(self, session: Session, user_id: str) -> dict:
+        """Mark all incomplete tasks as completed"""
+        try:
+            # Get all incomplete tasks for this user
+            statement = select(Task).where(
+                Task.user_id == user_id,
+                Task.status != "completed"
+            )
+            tasks = session.exec(statement).all()
+            
+            # Mark each as completed
+            for task in tasks:
+                task.status = "completed"
+                task.updated_at = datetime.utcnow()
+                session.add(task)
+            
+            session.commit()
+            
+            print(f"✅ Bulk completed {len(tasks)} tasks for user {user_id}")
+            
+            return {
+                "success": True,
+                "count": len(tasks),
+                "message": f"Successfully marked {len(tasks)} tasks as completed"
+            }
+        except Exception as e:
+            session.rollback()
+            raise
 
 
 # Global MCP server instance
