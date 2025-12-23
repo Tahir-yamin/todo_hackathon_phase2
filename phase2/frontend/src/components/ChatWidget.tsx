@@ -33,8 +33,8 @@ export function ChatWidget() {
         setLoading(true);
 
         try {
-            // Use real session user ID - call Railway backend
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${session.user.id}/chat`, {
+            // Use demo user ID to match task list (for hackathon demo)
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hackathon-demo-user/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
