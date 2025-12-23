@@ -12,7 +12,6 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 def list_tasks(
     session: Session = Depends(get_session),
     x_user_id: Optional[str] = Header(None),
-    session: Session = Depends(get_session),
     status: Optional[str] = Query(None, regex=r'^(all|todo|in_progress|completed)$'),
     priority: Optional[str] = Query(None, regex=r'^(all|low|medium|high)$'),
     search: Optional[str] = Query(None),
