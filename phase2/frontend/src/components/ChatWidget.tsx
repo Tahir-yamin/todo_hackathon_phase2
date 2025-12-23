@@ -53,9 +53,11 @@ export function ChatWidget() {
 
             setMessages(prev => [...prev, { role: 'model', content: data.response }]);
 
-            // Auto-refresh if task was created
-            if (data.response && (data.response.toLowerCase().includes('created') || data.response.toLowerCase().includes('added'))) {
-                setTimeout(() => window.location.reload(), 2000);
+            // Dispatch event to refresh tasks if tools were called
+            if (data.tool_calls && data.tool_calls > 0) {
+                // Custom event to trigger task list refresh
+                window.dispatchEvent(new CustomEvent('taskUpdated'));
+                console.log('✅ Task operation completed, refreshing task list...');
             }
         } catch (error) {
             console.error('Chat error:', error);
