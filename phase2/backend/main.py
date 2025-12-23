@@ -75,5 +75,5 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
     # Respect Railway's dynamic PORT assignment
-    port = int(os.getenv("PORT", 8002))
+    port = int(os.getenv("PORT", 8080))  # Default to 8080 to match uvicorn default
     uvicorn.run(app, host="0.0.0.0", port=port)
