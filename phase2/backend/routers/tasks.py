@@ -64,7 +64,7 @@ def list_tasks(
     tasks = session.exec(query).all()
 
     # Count total for pagination metadata
-    count_query = select(Task).where(Task.user_id == current_user.id)
+    count_query = select(Task).where(Task.user_id == user_id)
     if status and status != "all":
         count_query = count_query.where(Task.status == status)
     if priority and priority != "all":
