@@ -9,7 +9,11 @@ interface Message {
     content: string;
 }
 
-export function ChatWidget() {
+interface ChatWidgetProps {
+    onTaskUpdated?: () => void;
+}
+
+export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -53,11 +57,13 @@ export function ChatWidget() {
 
             setMessages(prev => [...prev, { role: 'model', content: data.response }]);
 
-            // Dispatch event to refresh tasks if tools were called
+            // Call callback to refresh tasks if tools were called
             if (data.tool_calls && data.tool_calls > 0) {
-                // Custom event to trigger task list refresh
-                window.dispatchEvent(new CustomEvent('taskUpdated'));
                 console.log('✅ Task operation completed, refreshing task list...');
+                // Call the callback directly for immediate refresh
+                if (onTaskUpdated) {
+                    onTaskUpdated();
+                }
             }
         } catch (error) {
             console.error('Chat error:', error);
