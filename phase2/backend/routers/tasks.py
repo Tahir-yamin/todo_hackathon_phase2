@@ -127,11 +127,7 @@ def create_task(
     session: Session = Depends(get_session),
     x_user_id: Optional[str] = Header(None)
 ):
-    """
-    Create a new task for the authenticated user.
-    """
-    # Hardcoded for hackathon demo
-    user_id = "hackathon-demo-user"
+    \"\"\"\n    Create a new task for the authenticated user.\n    \"\"\"\n    # Hardcoded for hackathon demo\n    user_id = \"hackathon-demo-user\"\n    \n    # Ensure demo user exists to prevent FK errors\n    ensure_demo_user(session, user_id)
     
     # Create task instance with user_id
     task = Task(
