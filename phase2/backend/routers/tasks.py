@@ -1,249 +1,126 @@
-from fastapi import APIRouter, HTTPException, Depends, Query, Header
-from typing import List, Optional
-from sqlmodel import Session, select
+from fastapi import APIRouter, HTTPException, Depends, Query
+from typing import Optional
+from sqlmodel import Session, select, text
 from datetime import datetime
 
 from db import get_session
-from models import Task, TaskCreate, TaskUpdate, TaskPublic
-from auth import BetterAuthUser  # Import to create demo user if needed
+from models import Task, TaskCreate, TaskUpdate
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
-# Helper function to ensure demo user exists
-def ensure_demo_user(session: Session, user_id: str = "hackathon-demo-user"):
+def ensure_demo_user(session: Session, user_id: str):
     """
-    Ensure the demo user exists in the better_auth user table.
-    Creates it if missing to prevent FK constraint errors.
+    Ensure the demo user exists in the database to prevent Foreign Key errors.
+    Uses raw SQL to avoid import issues with the User model.
     """
     try:
-        # Check if user exists in better_auth user table
-        existing_user = session.exec(
-            select(BetterAuthUser).where(BetterAuthUser.id == user_id)
-        ).first()
+        # Check if user exists using raw SQL for safety
+        statement = text("SELECT id FROM user WHERE id = :user_id")
+        result = session.exec(statement, params={"user_id": user_id}).first()
         
-        if not existing_user:
+        if not result:
             print(f"🔧 Creating demo user: {user_id}")
-            demo_user = BetterAuthUser(
-                id=user_id,
-                email="demo@hackathon.com",
-                name="Hackathon Demo User",
-                emailVerified=False,
-                createdAt=datetime.utcnow(),
-                updatedAt=datetime.utcnow()
-            )
-            session.add(demo_user)
+            # Insert demo user
+            insert_stmt = text("""
+                INSERT INTO user (id, email, name, "emailVerified", "createdAt", "updatedAt")
+                VALUES (:id, :email, :name, :verified, :created, :updated)
+            """)
+            session.exec(insert_stmt, params={
+                "id": user_id,
+                "email": "demo@hackathon.com",
+                "name": "Hackathon Demo User",
+                "verified": False,
+                "created": datetime.utcnow(),
+                "updated": datetime.utcnow()
+            })
             session.commit()
             print(f"✅ Demo user created: {user_id}")
     except Exception as e:
-        # If table doesn't exist or any error, just log and continue
-        # Tasks will work fine without FK constraints
-        print(f"⚠️ Note: Could not ensure user exists (this is OK): {e}")
+        print(f"⚠️ Warning: Could not ensure user exists (might be OK if no FK constraint): {e}")
+        # Continue execution - do not crash
         pass
 
-
-@router.get("/", response_model=dict)
+@router.get("/")
 def list_tasks(
     session: Session = Depends(get_session),
-    x_user_id: Optional[str] = Header(None),
-    status: Optional[str] = Query(None, regex=r'^(all|todo|in_progress|completed)$'),
-    priority: Optional[str] = Query(None, regex=r'^(all|low|medium|high)$'),
+    status: Optional[str] = Query(None),
+    priority: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
-    page: int = Query(1, ge=1),
-    limit: int = Query(10, ge=1, le=100),
+    page: int = Query(1),
+    limit: int = Query(10),
     sort: str = Query("created_at"),
     order: str = Query("desc")
 ):
-    """
-    Retrieve all tasks for the authenticated user with optional filtering and pagination.
-    """
-    # Hardcoded for hackathon demo
     user_id = "hackathon-demo-user"
+    ensure_demo_user(session, user_id)
     
-    # Build the query
     query = select(Task).where(Task.user_id == user_id)
 
-    # Apply filters
     if status and status != "all":
         query = query.where(Task.status == status)
-
     if priority and priority != "all":
         query = query.where(Task.priority == priority)
-
     if search:
-        query = query.where(Task.title.contains(search) | Task.description.contains(search))
+        query = query.where(Task.title.contains(search))
 
     # Apply sorting
-    if sort == "created_at":
-        if order == "desc":
-            query = query.order_by(Task.created_at.desc())
-        else:
-            query = query.order_by(Task.created_at.asc())
-    elif sort == "due_date":
-        if order == "desc":
-            query = query.order_by(Task.due_date.desc())
-        else:
-            query = query.order_by(Task.due_date.asc())
-    elif sort == "priority":
-        if order == "desc":
-            query = query.order_by(Task.priority.desc())
-        else:
-            query = query.order_by(Task.priority.asc())
+    if order == "desc":
+        query = query.order_by(getattr(Task, sort).desc())
+    else:
+        query = query.order_by(getattr(Task, sort).asc())
 
-    # Calculate pagination
+    # Pagination
     offset = (page - 1) * limit
-    query = query.offset(offset).limit(limit)
+    tasks = session.exec(query.offset(offset).limit(limit)).all()
+    
+    return {"success": True, "data": {"tasks": tasks}}
 
-    # Execute query
-    tasks = session.exec(query).all()
-
-    # Count total for pagination metadata
-    count_query = select(Task).where(Task.user_id == user_id)
-    if status and status != "all":
-        count_query = count_query.where(Task.status == status)
-    if priority and priority != "all":
-        count_query = count_query.where(Task.priority == priority)
-    if search:
-        count_query = count_query.where(Task.title.contains(search) | Task.description.contains(search))
-
-    total = len(session.exec(count_query).all())
-
-    return {
-        "success": True,
-        "data": {
-            "tasks": tasks,
-            "pagination": {
-                "page": page,
-                "limit": limit,
-                "total": total,
-                "total_pages": (total + limit - 1) // limit
-            }
-        }
-    }
-
-
-@router.post("/", response_model=dict)
+@router.post("/")
 def create_task(
     task_data: TaskCreate,
-    session: Session = Depends(get_session),
-    x_user_id: Optional[str] = Header(None)
+    session: Session = Depends(get_session)
 ):
-    \"\"\"\n    Create a new task for the authenticated user.\n    \"\"\"\n    # Hardcoded for hackathon demo\n    user_id = \"hackathon-demo-user\"\n    \n    # Ensure demo user exists to prevent FK errors\n    ensure_demo_user(session, user_id)
+    user_id = "hackathon-demo-user"
+    ensure_demo_user(session, user_id)
     
-    # Create task instance with user_id
-    task = Task(
-        **task_data.dict(),
-        user_id=user_id
-    )
-
+    task = Task(**task_data.dict(), user_id=user_id)
     session.add(task)
     session.commit()
     session.refresh(task)
+    
+    return {"success": True, "data": task, "message": "Task created successfully"}
 
-    return {
-        "success": True,
-        "data": task,
-        "message": "Task created successfully"
-    }
-
-
-@router.get("/{id}", response_model=dict)
-def get_task(
-    id: str,
-    session: Session = Depends(get_session),
-    x_user_id: Optional[str] = Header(None)
-):
-    """
-    Retrieve a specific task by ID.
-    """
-    # Hardcoded for hackathon demo
-    user_id = "hackathon-demo-user"
-    task = session.get(Task, id)
-
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    # Verify that the task belongs to the current user
-    if task.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this task")
-
-    return {
-        "success": True,
-        "data": task
-    }
-
-
-@router.put("/{id}", response_model=dict)
+@router.put("/{id}")
 def update_task(
     id: str,
     task_data: TaskUpdate,
-    session: Session = Depends(get_session),
-    x_user_id: Optional[str] = Header(None)
+    session: Session = Depends(get_session)
 ):
-    """
-    Update a specific task.
-    """
-    # Hardcoded for hackathon demo
-    user_id = "hackathon-demo-user"
     task = session.get(Task, id)
-
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-
-    # Verify that the task belongs to the current user
-    if task.user_id != user_id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this task")
-
-    # Update task fields
+        
     task_dict = task_data.dict(exclude_unset=True)
     for key, value in task_dict.items():
         setattr(task, key, value)
-
-    # Update the updated_at timestamp
+        
     task.updated_at = datetime.utcnow()
-
-    # Handle status change to completed
-    if task_data.status == "completed" and task.status != "completed":
-        task.completed_at = datetime.utcnow()
-    elif task_data.status in ["todo", "in_progress"] and task.status == "completed":
-        task.completed_at = None
-
     session.add(task)
     session.commit()
     session.refresh(task)
+    
+    return {"success": True, "data": task}
 
-    return {
-        "success": True,
-        "data": task,
-        "message": "Task updated successfully"
-    }
-
-
-@router.delete("/{id}", response_model=dict)
+@router.delete("/{id}")
 def delete_task(
     id: str,
-    session: Session = Depends(get_session),
-    x_user_id: Optional[str] = Header(None)
+    session: Session = Depends(get_session)
 ):
-    """
-    Delete a specific task.
-    """
-    # Hardcoded for hackathon demo
-    user_id = "hackathon-demo-user"
-    # Find task by ID and verify ownership
-    task = session.exec(
-        select(Task).where(Task.id == id).where(Task.user_id == user_id)
-    ).first()
-    
+    task = session.get(Task, id)
     if not task:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found or you don't have permission to delete it"
-        )
-    
+        raise HTTPException(status_code=404, detail="Task not found")
+        
     session.delete(task)
     session.commit()
     
-    return {
-        "success": True,
-        "message": f"Task '{task.title}' deleted successfully"
-    }
+    return {"success": True, "message": "Task deleted"}
