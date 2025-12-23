@@ -7,7 +7,7 @@ Uses OpenRouter API (OpenAI-compatible) with MCP tools for function calling.
 import os
 import json
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlmodel import Session, select
 from pydantic import BaseModel
 from openai import OpenAI
@@ -39,15 +39,19 @@ class ChatResponse(BaseModel):
 
 @router.post("/api/{user_id}/chat", response_model=ChatResponse)
 async def chat_with_ai(
-    user_id: str,
+    user_id: str,  # Path parameter for backward compatibility
     request: ChatRequest,
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
+    x_user_id: Optional[str] = Header(None)
 ):
     """
     AI-powered chat with task management capabilities using OpenRouter
     """
     try:
-        print(f"\n💬 Chat request from {user_id}: {request.message}")
+        # Use header user_id if provided (real user), otherwise use path parameter (legacy)
+        effective_user_id = x_user_id if x_user_id else user_id
+        
+        print(f"\n💬 Chat request from {effective_user_id}: {request.message}")
         
         # Build messages with history
         messages = [
@@ -56,7 +60,8 @@ async def chat_with_ai(
                 "content": (
                     "You are a helpful task management assistant. "
                     "Help users manage their to-do list efficiently. "
-                    "When users ask to add, list, update, or delete tasks, use the available tools. "
+                    "When users ask to add, list, update, delete, or complete tasks, use the available tools. "
+                    "If the user says 'complete all tasks' or 'mark everything as done', use the bulk_complete_tasks tool. "
                     "Be friendly and concise in your responses."
                 )
             }
@@ -69,7 +74,7 @@ async def chat_with_ai(
         # Add current user message
         messages.append({"role": "user", "content": request.message})
         
-        print(f"🔧 Calling OpenRouter with {len(messages)} messages...")
+        print(f"🔧 Calling OpenRouter with {len(messages)} messages for user: {effective_user_id}...")
         
         # Call OpenRouter with function calling
         response = client.chat.completions.create(
@@ -97,11 +102,11 @@ async def chat_with_ai(
                 print(f"  📌 Tool: {function_name}")
                 print(f"  📊 Args: {function_args}")
                 
-                # Execute via MCP server
+                # Execute via MCP server with the correct user ID
                 result = await mcp.execute_tool(
                     function_name,
                     function_args,
-                    user_id
+                    effective_user_id  # Use the header-based user ID
                 )
                 
                 print(f"  ✅ Result: {result}")
