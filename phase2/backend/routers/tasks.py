@@ -23,8 +23,8 @@ def list_tasks(
     """
     Retrieve all tasks for the authenticated user with optional filtering and pagination.
     """
-    # Use header user ID or fallback to demo
-    user_id = x_user_id or "demo_user"
+    # Hardcoded for hackathon demo
+    user_id = "hackathon-demo-user"
     
     # Build the query
     query = select(Task).where(Task.user_id == user_id)
@@ -97,8 +97,8 @@ def create_task(
     """
     Create a new task for the authenticated user.
     """
-    # Use header user ID or fallback to demo
-    user_id = x_user_id or "demo_user"
+    # Hardcoded for hackathon demo
+    user_id = "hackathon-demo-user"
     
     # Create task instance with user_id
     task = Task(
@@ -126,7 +126,8 @@ def get_task(
     """
     Retrieve a specific task by ID.
     """
-    user_id = x_user_id or "demo_user"
+    # Hardcoded for hackathon demo
+    user_id = "hackathon-demo-user"
     task = session.get(Task, id)
 
     if not task:
@@ -152,7 +153,8 @@ def update_task(
     """
     Update a specific task.
     """
-    user_id = x_user_id or "demo_user"
+    # Hardcoded for hackathon demo
+    user_id = "hackathon-demo-user"
     task = session.get(Task, id)
 
     if not task:
@@ -196,7 +198,8 @@ def delete_task(
     """
     Delete a specific task.
     """
-    user_id = x_user_id or "demo_user"
+    # Hardcoded for hackathon demo
+    user_id = "hackathon-demo-user"
     # Find task by ID and verify ownership
     task = session.exec(
         select(Task).where(Task.id == id).where(Task.user_id == user_id)
