@@ -94,3 +94,16 @@ class Message(SQLModel, table=True):
     role: str = Field()  # 'user' or 'model'
     content: str = Field()
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+# BetterAuth User table model (for demo user auto-creation)
+class User(SQLModel, table=True):
+    __tablename__ = "user"  # Must match BetterAuth table name
+    
+    id: str = Field(primary_key=True)
+    email: str
+    name: str
+    emailVerified: bool = False
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
+

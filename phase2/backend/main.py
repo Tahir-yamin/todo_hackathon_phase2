@@ -8,9 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+from sqlmodel import SQLModel
 
 # Relative imports for production deployment
-from db import create_db_and_tables
+from db import create_db_and_tables, engine
 from routers import tasks, auth, ai, chat
 from auth import get_current_user, BetterAuthUser
 
@@ -18,6 +19,9 @@ from auth import get_current_user, BetterAuthUser
 async def lifespan(app: FastAPI):
     # Create database tables on startup
     create_db_and_tables()
+    # Force-create all SQLModel tables (including User)
+    SQLModel.metadata.create_all(engine)
+    print("✅ All database tables created/verified")
     yield
 
 
