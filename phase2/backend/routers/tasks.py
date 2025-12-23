@@ -5,8 +5,41 @@ from datetime import datetime
 
 from db import get_session
 from models import Task, TaskCreate, TaskUpdate, TaskPublic
+from auth import BetterAuthUser  # Import to create demo user if needed
 
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
+
+# Helper function to ensure demo user exists
+def ensure_demo_user(session: Session, user_id: str = "hackathon-demo-user"):
+    """
+    Ensure the demo user exists in the better_auth user table.
+    Creates it if missing to prevent FK constraint errors.
+    """
+    try:
+        # Check if user exists in better_auth user table
+        existing_user = session.exec(
+            select(BetterAuthUser).where(BetterAuthUser.id == user_id)
+        ).first()
+        
+        if not existing_user:
+            print(f"🔧 Creating demo user: {user_id}")
+            demo_user = BetterAuthUser(
+                id=user_id,
+                email="demo@hackathon.com",
+                name="Hackathon Demo User",
+                emailVerified=False,
+                createdAt=datetime.utcnow(),
+                updatedAt=datetime.utcnow()
+            )
+            session.add(demo_user)
+            session.commit()
+            print(f"✅ Demo user created: {user_id}")
+    except Exception as e:
+        # If table doesn't exist or any error, just log and continue
+        # Tasks will work fine without FK constraints
+        print(f"⚠️ Note: Could not ensure user exists (this is OK): {e}")
+        pass
+
 
 @router.get("/", response_model=dict)
 def list_tasks(
