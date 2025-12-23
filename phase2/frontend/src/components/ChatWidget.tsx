@@ -38,10 +38,12 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
 
         try {
             // Use demo user ID to match task list (for hackathon demo)
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hackathon-demo-user/chat`, {
+            const userId = session.user.id;
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/chat`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-User-ID': userId  // Pass real user ID in header
                 },
                 body: JSON.stringify({
                     conversation_id: conversationId,
