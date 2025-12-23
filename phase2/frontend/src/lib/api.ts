@@ -16,7 +16,7 @@ const getAuthHeaders = async () => {
 export const api = {
   getTasks: async () => {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${API_URL}/api/tasks/`, { headers }); // Added trailing slash
+    const res = await fetch(`${API_URL}/api/tasks`, { headers });
 
     if (!res.ok) {
       // NUCLEAR DEV BYPASS: Don't redirect on 401
@@ -31,7 +31,7 @@ export const api = {
 
   createTask: async (taskData: any) => {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${API_URL}/api/tasks/`, { // Added trailing slash
+    const res = await fetch(`${API_URL}/api/tasks`, {
       method: 'POST',
       headers,
       body: JSON.stringify(taskData),
