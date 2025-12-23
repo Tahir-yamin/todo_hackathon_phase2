@@ -28,20 +28,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware - Allow specific Vercel frontend
-frontend_url = os.getenv("FRONTEND_URL", "https://frontend-seven-tawny-19.vercel.app")
-print(f"🔧 DEBUG: Configuring CORS for origin: {frontend_url}")
-print(f"🔧 DEBUG: Type of frontend_url: {type(frontend_url)}")
+# Add CORS middleware - WIDE OPEN FOR HACKATHON DEMO
+print(f"🔧 DEBUG: Configuring CORS with WILDCARD (hackathon demo mode)")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_url] if frontend_url else ["*"],
-    allow_credentials=True,
+    allow_origins=["*"],  # Wildcard for demo
+    allow_credentials=False,  # MUST be False with wildcard
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
 )
-print(f"✅ DEBUG: CORS configured successfully")
+print(f"✅ DEBUG: CORS configured with wildcard - demo mode active")
 
 # Include the routers
 app.include_router(tasks.router)
