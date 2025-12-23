@@ -4,21 +4,12 @@ import jwt
 from fastapi import HTTPException, Depends, Request, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from passlib.context import CryptContext
-from sqlmodel import Session, select, SQLModel, Field
+from sqlmodel import Session, select
 from db import get_session
 import os
 
-# Simple User model matching Better Auth's user table
-class BetterAuthUser(SQLModel, table=True):
-    __tablename__ = "user"
-    
-    id: str = Field(primary_key=True)
-    email: str
-    name: Optional[str] = None
-    emailVerified: bool = False
-    image: Optional[str] = None
-    createdAt: datetime
-    updatedAt: datetime
+# Import User model from models.py (aliased as BetterAuthUser for compatibility)
+from models import User as BetterAuthUser
 
 # Security settings
 SECRET_KEY = os.getenv("BETTER_AUTH_SECRET", "your-secret-key-change-in-production")
@@ -47,48 +38,64 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def decode_token(token: str):
+    """Decode and verify a JWT token."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+# HTTP Bearer security scheme
+security = HTTPBearer()
+
 async def get_current_user(
-    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     session: Session = Depends(get_session)
 ) -> BetterAuthUser:
-    """Get current user from X-User-ID header (set by Better Auth frontend)."""
+    """Get the current authenticated user from JWT token."""
+    token = credentials.credentials
+    payload = decode_token(token)
+    user_id: str = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
+   
+    user = session.get(BetterAuthUser, user_id)
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+# For BetterAuth compatibility - get user from X-User-ID header
+async def get_user_from_header(
+    x_user_id: Optional[str] = Header(None),
+    session: Session = Depends(get_session)
+) -> Optional[BetterAuthUser]:
+    """Get user from X-User-ID header (BetterAuth compatibility)."""
+    if not x_user_id:
+        return None
     
-    # 1. Try Header (Priority for hackathon - port mismatch workaround)
-    user_id = request.headers.get("X-User-ID", request.headers.get("x-user-id"))
-    if user_id:
-        # Dynamically create user object from header (no DB lookup needed)
-        return BetterAuthUser(
-            id=user_id,
-            email=f"{user_id}@app.com",
-            name=user_id.split('@')[0] if '@' in user_id else user_id[:10],
-            emailVerified=True,
-            image=None,
-            createdAt=datetime.now(),
-            updatedAt=datetime.now()
-        )
-    
-    # 2. Try Cookie (Fallback for traditional better-auth)
-    token = request.cookies.get("better-auth.session_token")
-    if token:
-        # Could validate token here, but for hackathon we trust it
-        return BetterAuthUser(
-            id="cookie_user",
-            email="cookie@test.com",
-            name="Cookie User",
-            emailVerified=True,
-            image=None,
-            createdAt=datetime.now(),
-            updatedAt=datetime.now()
-        )
-    
-    # 3. Dev fallback (for Swagger testing)
-    print("⚠️  DEV MODE: No header or cookie, using dev_user_123")
-    return BetterAuthUser(
-        id="dev_user_123",
-        email="dev@test.com",
-        name="Dev User",
-        emailVerified=True,
-        image=None,
-        createdAt=datetime.now(),
-        updatedAt=datetime.now()
-    )
+    user = session.get(BetterAuthUser, x_user_id)
+    return user
+
+async def get_current_user_optional(
+    request: Request,
+    session: Session = Depends(get_session)
+) -> Optional[BetterAuthUser]:
+    """Get current user if authenticated, None otherwise."""
+    try:
+        # Try to get from header first
+        user_id = request.headers.get("X-User-ID")
+        if user_id:
+            return session.get(BetterAuthUser, user_id)
+        
+        # Try to get from Authorization header
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            payload = decode_token(token)
+            user_id = payload.get("sub")
+            if user_id:
+                return session.get(BetterAuthUser, user_id)
+    except:
+        pass
+    return None
