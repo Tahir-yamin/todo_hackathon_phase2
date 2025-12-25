@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronLeft, Plus } from 'lucide-react';
+import { ChevronLeft, Plus, Sparkles } from 'lucide-react';
 import TaskForm from './TaskForm';
 
 interface SidebarProps {
@@ -14,14 +14,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onTaskCreated }) => {
     return (
         <aside
             className={`${isOpen ? 'w-[320px]' : 'w-16'
-                } bg-background-dark/80 backdrop-blur-lg border-r border-border-grid relative transition-all duration-300 flex flex-col pt-16 overflow-hidden z-50`}
+                } bg-white/5 dark:bg-white/5 bg-slate-100/80 backdrop-blur-xl border-r dark:border-white/10 border-slate-300 relative transition-all duration-300 flex flex-col overflow-hidden z-50`}
         >
             {/* Toggle Button */}
-            <div className="absolute top-0 right-0 h-16 w-16 flex items-center justify-center z-20">
+            <div className="absolute top-4 right-4 z-20">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-2 text-primary hover:text-primary-dark transition-colors"
-                    title="Toggle AI Synthesis Engine"
+                    className="p-2 dark:bg-white/5 bg-white border dark:border-white/10 border-slate-300 rounded-xl dark:text-purple-400 text-purple-600 dark:hover:text-purple-300 hover:text-purple-700 dark:hover:border-white/20 hover:border-purple-300 transition-all"
+                    title="Toggle Sidebar"
                 >
                     {isOpen ? (
                         <ChevronLeft className="w-5 h-5" />
@@ -33,55 +33,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ onTaskCreated }) => {
 
             {/* Sidebar Content */}
             {isOpen && (
-                <div className="flex flex-col h-full">
+                <div className="flex flex-col h-full pt-16">
                     {/* Header */}
-                    <div className="p-4 border-b border-border-subtle flex justify-between items-center bg-surface-dark/70 sticky top-0 z-10">
-                        <h2 className="text-base font-bold text-primary flex items-center gap-2 font-mono">
-                            <span className="text-lg">⚡</span> AI Synthesis Engine
-                        </h2>
-                        <span className="text-xs font-mono text-text-dark bg-surface-dark px-2 py-1 border border-border-subtle rounded-sm">
-                            CMD+N
-                        </span>
+                    <div className="px-6 py-4 border-b dark:border-white/10 border-slate-300">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.3)] dark:border-white/10 border-purple-200 border">
+                                <Sparkles className="w-5 h-5 dark:text-purple-400 text-purple-600" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold dark:text-white text-slate-900">Add New Task</h2>
+                                <p className="text-xs dark:text-slate-400 text-slate-600">Create with AI or manually</p>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Content - Just Visualization and Form */}
-                    <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
-                        {/* Synthesis Visualization */}
-                        <div className="relative h-36 bg-background-dark border border-node-border overflow-hidden rounded-sm">
-                            {/* Grid Background */}
-                            <div
-                                className="absolute inset-0 opacity-10 animate-flow"
-                                style={{
-                                    backgroundImage:
-                                        'linear-gradient(0deg, rgba(0,240,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.1) 1px, transparent 1px)',
-                                    backgroundSize: '20px 20px',
-                                }}
-                            ></div>
+                    {/* Task Form */}
+                    <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
+                        <TaskForm onTaskCreated={onTaskCreated} inSidebar={true} />
+                    </div>
 
-                            {/* Central Content */}
-                            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                                <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary/50 mb-2 animate-node-sparkle">
-                                    <span className="text-2xl">📊</span>
-                                </div>
-                                <p className="text-xs font-mono text-primary/80">SYNTHESIS_VISUALIZATION</p>
-                                <p className="text-[10px] text-text-dark/50 mt-1">Algorithmic Integration</p>
-                            </div>
-
-                            {/* Floating Nodes */}
-                            <div className="absolute top-3 left-3 w-6 h-6 rounded-full bg-primary/30 blur-sm animate-node-sparkle"></div>
-                            <div
-                                className="absolute bottom-3 right-3 w-5 h-5 rounded-full bg-red-500/30 blur-sm animate-node-sparkle"
-                                style={{ animationDelay: '1s' }}
-                            ></div>
-                            <div
-                                className="absolute top-1/3 left-1/4 w-4 h-4 rounded-full bg-green-500/30 blur-sm animate-node-sparkle"
-                                style={{ animationDelay: '2s' }}
-                            ></div>
-                        </div>
-
-                        {/* Task Form - Full width in sidebar */}
-                        <div className="space-y-3">
-                            <TaskForm onTaskCreated={onTaskCreated} inSidebar={true} />
+                    {/* Footer tip */}
+                    <div className="p-4 border-t dark:border-white/10 border-slate-300 dark:bg-white/5 bg-purple-50">
+                        <div className="flex items-start gap-2 text-xs dark:text-slate-400 text-slate-600">
+                            <Sparkles className="w-4 h-4 dark:text-purple-400 text-purple-600 flex-shrink-0 mt-0.5" />
+                            <p>
+                                <span className="dark:text-purple-400 text-purple-600 font-medium">Pro tip:</span> Use natural language to create tasks via the chat widget!
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -90,7 +67,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onTaskCreated }) => {
             {/* Collapsed State Icon */}
             {!isOpen && (
                 <div className="flex flex-col items-center justify-center h-full gap-4">
-                    <span className="text-primary text-2xl">⚡</span>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.3)] border border-white/10">
+                        <Sparkles className="w-5 h-5 text-purple-400" />
+                    </div>
                 </div>
             )}
         </aside>

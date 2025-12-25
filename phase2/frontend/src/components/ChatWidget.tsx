@@ -62,6 +62,10 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
             // Call callback to refresh tasks if tools were called
             if (data.tool_calls && data.tool_calls > 0) {
                 console.log('✅ Task operation completed, refreshing task list...');
+
+                // 🔥 Broadcast global event to trigger dashboard refresh
+                window.dispatchEvent(new CustomEvent('task-update'));
+
                 // Call the callback directly for immediate refresh
                 if (onTaskUpdated) {
                     onTaskUpdated();

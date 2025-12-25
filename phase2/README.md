@@ -1,124 +1,87 @@
-# Phase II: Full-Stack Todo Application
+# Evolution of Todo 🚀 (Hackathon II Submission)
 
-A production-ready web application with Python FastAPI backend and React (Next.js) frontend.
+**A Cloud-Native, AI-Agentic Task Manager built with Spec-Driven Development.**
 
-## Description
+## 🌟 The Vision
+We moved beyond simple CRUD. This application features an **AI Agent** that lives inside your dashboard, understanding context and manipulating the database directly via MCP Tools, synced instantly with a reactive UI.
 
-This is the Phase II implementation - a complete full-stack web application with authentication, database persistence, and a modern UI.
+## 🏗️ Tech Stack (The "Clean Slate" Architecture)
+* **Frontend:** Next.js 14 (App Router) + Tailwind CSS + Framer Motion (3D Visuals)
+* **Backend:** Python FastAPI (REST API + AI Agent)
+* **Database:** Neon Serverless PostgreSQL
+* **ORM:** Prisma v5 (Stable)
+* **Authentication:** BetterAuth with Prisma Adapter (Google/GitHub SSO + Email Verification)
+* **AI Engine:** Anthropic/OpenAI via MCP (Model Context Protocol)
 
-## Features
+## ✨ Key Features
+1. **Event-Driven UI Sync:** Chat with the AI ("Add a task to buy milk"), and the Kanban board updates *instantly* without a page refresh.
+2. **Secure Authentication:**
+   * OAuth 2.0 (Google & GitHub)
+   * Mandatory Email Verification (with Dev-Interceptor for hackathon demoing)
+3. **Floating 3D Command Center:** A "World Class" glassmorphic landing page.
+4. **Spec-Driven Development:** Built following the `Specify -> Plan -> Task -> Implement` cycle using Claude Code.
 
-- ✅ User authentication (sign up, login, logout)
-- ✅ Create, read, update, delete tasks
-- ✅ Mark tasks as complete/incomplete
-- ✅ Task filtering and search
-- ✅ Priority levels
-- ✅ Due dates
-- ✅ Tags/categories
-- ✅ Database persistence (PostgreSQL)
-- ✅ RESTful API
-- ✅ Modern React UI
+## 🛠️ Local Setup
 
-## Prerequisites
+### Prerequisites
+* Node.js v20+
+* Python 3.10+
+* PostgreSQL URL (Neon or Local)
 
-- Python 3.13+
-- Node.js 18+
-- PostgreSQL database (or Neon serverless)
-
-## Quick Start
-
-### For Complete Instructions
-See [START_GUIDE.md](START_GUIDE.md) for detailed startup instructions for all platforms (Windows, Linux, WSL).
-
-### Quick Start (Linux/Mac/WSL)
-```bash
-cd phase2
-./start.sh
-```
-
-### Quick Start (Windows PowerShell)
-```powershell
-cd phase2
-.\start.ps1
-```
-
-The application will be available at:
-- **Frontend**: http://localhost:3002
-- **Backend API**: http://localhost:8002
-- **API Docs**: http://localhost:8002/docs
-
-## Project Structure
-
-```
-phase2/
-├── backend/              # FastAPI backend
-│   ├── main.py          # Application entry point
-│   ├── db.py            # Database configuration
-│   ├── models.py        # Data models
-│   ├── auth.py          # Authentication
-│   └── routers/         # API endpoints
-├── frontend/            # Next.js React frontend
-│   ├── src/            # Source code
-│   └── package.json    # Dependencies
-├── scripts/            # Database setup scripts
-├── docs/               # Documentation
-├── start.sh            # Startup script (Linux/Mac/WSL)
-├── start.ps1           # Unified startup (PowerShell)
-└── START_GUIDE.md      # Complete startup guide
-```
-
-## Setup
-
-### Backend Setup
+### 1. Backend (FastAPI)
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
+uvicorn main:app --reload --port 8002
 ```
 
-### Frontend Setup
+### 2. Frontend (Next.js)
 ```bash
 cd frontend
+# Important: Use Prisma v5 for stability
 npm install
+npx prisma generate
+npx dotenv-cli -e .env.local -- npx prisma db push
+npm run dev
 ```
 
-### Environment Configuration
+### 3. Environment Variables
+Create `.env.local` in the frontend directory:
+```env
+DATABASE_URL=your_neon_postgresql_url
+BETTER_AUTH_SECRET=your_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+NEXT_PUBLIC_APP_URL=http://localhost:3002
+NEXT_PUBLIC_API_URL=http://localhost:8002
+```
 
-1. **Backend**: Copy `backend/.env.example` to `backend/.env` and configure:
-   - `DATABASE_URL` - PostgreSQL connection string
-   - `BETTER_AUTH_SECRET` - Authentication secret
+## 🧪 Architecture Decisions
 
-2. **Frontend**: Copy `frontend/.env.local.example` to `frontend/.env.local` and configure:
-   - `NEXT_PUBLIC_APP_URL` - Frontend URL (http://localhost:3002)
-   - `NEXT_PUBLIC_API_URL` - Backend URL (http://localhost:8002)
-   - `BETTER_AUTH_SECRET` - Must match backend secret
+See `docs/lessons-learned-sso-auth.md` for a deep dive into how we solved the "OAuth 500 Error" crisis during the hackathon.
 
-## API Documentation
+## 🎯 Demo Highlights
 
-Once running, access:
-- Swagger UI: http://localhost:8002/docs
-- ReDoc: http://localhost:8002/redoc
+**Authentication Flow:**
+- 3 methods: Google OAuth, GitHub OAuth, Email/Password
+- Mandatory email verification prevents spam accounts
+- Terminal fallback for testing (production uses Resend)
 
-## Technology Stack
+**AI Integration:**
+- Natural language task creation
+- Instant UI sync via global event bus
+- Context-aware task management
 
-**Backend:**
-- FastAPI (Python web framework)
-- SQLModel (ORM)
-- PostgreSQL (Database)
-- Better Auth (Authentication)
-- Uvicorn (ASGI server)
+**UI/UX:**
+- Glassmorphic design with animated backgrounds
+- Framer Motion 3D effects
+- Responsive Kanban board with drag-and-drop
 
-**Frontend:**
-- Next.js 14 (React framework)
-- TypeScript
-- Tailwind CSS
-- Axios (HTTP client)
-- Better Auth client
+---
 
-## Additional Documentation
-
-- [START_GUIDE.md](START_GUIDE.md) - Complete startup guide for all platforms
-- [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) - Detailed setup instructions
-- [docs/MANUAL_DB_SETUP.md](docs/MANUAL_DB_SETUP.md) - Database setup
-- [docs/BETTER_AUTH_IMPLEMENTATION.md](docs/BETTER_AUTH_IMPLEMENTATION.md) - Auth implementation details
+*Built for the Agentic AI Hackathon 2025.*
+*Survived 12+ hours of OAuth debugging to emerge stronger.* 💪

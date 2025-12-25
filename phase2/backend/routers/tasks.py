@@ -59,8 +59,8 @@ def list_tasks(
     try:
         # Use header user_id if provided, otherwise fall back to demo user
         user_id = x_user_id if x_user_id else "hackathon-demo-user"
-        # Ensure user exists before query to prevent issues
-        ensure_demo_user(session, user_id)
+        # BetterAuth handles user creation - no need to manually ensure user exists
+       # ensure_demo_user(session, user_id)
         
         query = select(Task).where(Task.user_id == user_id)
 
@@ -99,7 +99,8 @@ def create_task(
     try:
         # Use header user_id if provided, otherwise fall back to demo user
         user_id = x_user_id if x_user_id else "hackathon-demo-user"
-        ensure_demo_user(session, user_id)
+        # BetterAuth handles user creation
+        # ensure_demo_user(session, user_id)
         
         task = Task(**task_data.dict(), user_id=user_id)
         session.add(task)
