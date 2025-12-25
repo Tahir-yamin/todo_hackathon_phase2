@@ -85,3 +85,5 @@ See `docs/lessons-learned-sso-auth.md` for a deep dive into how we solved the "O
 
 *Built for the Agentic AI Hackathon 2025.*
 *Survived 12+ hours of OAuth debugging to emerge stronger.* 💪
+
+<!-- Deployment: 2025-12-25 15:56 UTC+5 - OAuth Fixed, Email Verification Live, Auto-Refresh Implemented -->
