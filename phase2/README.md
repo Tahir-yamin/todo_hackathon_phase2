@@ -54,26 +54,6 @@ DATABASE_URL=your_neon_postgresql_url
 BETTER_AUTH_SECRET=your_secret_key
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_client_secret
-NEXT_PUBLIC_APP_URL=http://localhost:3002
-NEXT_PUBLIC_API_URL=http://localhost:8002
-```
-
-## 🧪 Architecture Decisions
-
-See `docs/lessons-learned-sso-auth.md` for a deep dive into how we solved the "OAuth 500 Error" crisis during the hackathon.
-
-## 🎯 Demo Highlights
-
-**Authentication Flow:**
-- 3 methods: Google OAuth, GitHub OAuth, Email/Password
-- Mandatory email verification prevents spam accounts
-- Terminal fallback for testing (production uses Resend)
-
-**AI Integration:**
-- Natural language task creation
-- Instant UI sync via global event bus
 - Context-aware task management
 
 **UI/UX:**
