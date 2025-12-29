@@ -166,9 +166,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                if (confirm('Delete this data packet?')) {
-                                    onDelete(task.id);
-                                }
+                                onDelete(task.id);
                             }}
                             className="p-1 text-slate-400 hover:text-red-400 transition-colors"
                             title="Delete"

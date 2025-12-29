@@ -1,8 +1,9 @@
-// This is your Prisma schema file
-// Based on working better-auth example with PostgreSQL
+// Prisma Schema - Source of Truth for Better Auth + Todo App
+// This schema is shared across Frontend & Backend
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -10,62 +11,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ========================================
+// BETTER AUTH MODELS
+// ========================================
+
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  emailVerified Boolean?  @default(false)
   image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
   sessions      Session[]
   accounts      Account[]
+  tasks         Task[]     // Link to user's tasks
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
   expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
   ipAddress String?
   userAgent String?
-  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid())
+  userId                String
   accountId             String
   providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  password              String?   // Hashed password for email/password auth
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
 
 model Verification {
-  id         String    @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("verification")
+}
+
+// ========================================
+// TODO APP MODELS
+// ========================================
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    String    @default("medium")
+  dueDate     DateTime? @map("due_date")
+  status      String    @default("todo")
+  category    String?   @default("Personal")
+  tags        String?   @default("")
+  completedAt DateTime? @map("completed_at")
+  userId      String?   @map("user_id")
+  userEmail   String?   @map("user_email")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Task")
 }

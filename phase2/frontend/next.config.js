@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Removed 'output: export' for Vercel server-side support
+  // Enable standalone output for Docker/Kubernetes deployment
+  output: 'standalone',
   // API routes and Better Auth require server-side rendering
 }
 

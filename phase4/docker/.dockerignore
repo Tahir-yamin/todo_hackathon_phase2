@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env.local
+backend/venv
+backend/__pycache__
+*.log
+docker-compose.yml
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode
+.idea

@@ -1,0 +1,270 @@
+# ===============================================
+# Evolution Todo - Helm Chart Configuration
+# ===============================================
+# This file is the "Control Panel" for the entire deployment.
+# Modify values here instead of editing individual YAML files.
+# ===============================================
+
+# ========== Global Configuration ==========
+namespace: todo-chatbot
+
+# Image pull policy for all containers
+imagePullPolicy: Never  # Use "IfNotPresent" for production
+
+# Resource defaults (can be overridden per service)
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+# ========== Database Configuration (PostgreSQL) ==========
+database:
+  enabled: true
+  replicaCount: 1
+  
+  image:
+    repository: postgres
+    tag: 15-alpine
+    pullPolicy: IfNotPresent
+  
+  # Persistent storage
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: ""  # Use default storage class
+    accessMode: ReadWriteOnce
+  
+  # Database credentials
+  auth:
+    database: tododb
+    username: postgres
+    password: postgres  # TODO: Use secrets in production
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 5432
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Health probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# ========== Backend Configuration (FastAPI) ==========
+backend:
+  enabled: true
+  replicaCount: 1
+  
+  image:
+    repository: todo-backend
+    tag: v1
+    pullPolicy: Never  # Use "IfNotPresent" for production
+  
+  # Container port
+  containerPort: 8000
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  
+  # Environment variables (non-sensitive)
+  env:
+    PORT: "8000"
+    HOST: "0.0.0.0"
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Health probes
+  livenessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  
+  # Autoscaling (HPA)
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 70
+
+# ========== Frontend Configuration (Next.js) ==========
+frontend:
+  enabled: true
+  replicaCount: 2  # High availability with 2 replicas
+  
+  image:
+    repository: todo-frontend
+    tag: v1
+    pullPolicy: Never  # Use "IfNotPresent" for production
+  
+  # Container port
+  containerPort: 3000
+  
+  # Service configuration
+  service:
+    type: NodePort
+    port: 3000
+    targetPort: 3000
+    nodePort: 30000  # Fixed port for local access
+  
+  # Environment variables (non-sensitive)
+  env:
+    PORT: "3000"
+    HOSTNAME: "0.0.0.0"
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  
+  # Health probes
+  livenessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    enabled: true
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+  
+  # Autoscaling (HPA)
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+
+# ========== Configuration (ConfigMap) ==========
+config:
+  # Frontend configuration
+  NEXT_PUBLIC_API_URL: "http://backend-service:8000"
+  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+  BETTER_AUTH_URL: "http://localhost:3000"
+  
+  # Backend configuration
+  DATABASE_URL: "postgresql://postgres:postgres@db-service:5432/tododb"
+  CLIENT_URL: "http://frontend-service:3000"
+  SITE_URL: "http://localhost:3000"
+  
+  # Environment
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+# ========== Secrets Configuration ==========
+# WARNING: These are base64-encoded default values
+# For production, use external secret management (Vault, AWS Secrets Manager, etc.)
+secrets:
+  # BETTER_AUTH_SECRET - JWT signing key
+  # Default: "dev_secret_key_change_in_production"
+  betterAuthSecret: ZGV2X3NlY3JldF9rZXlfY2hhbmdlX2luX3Byb2R1Y3Rpb24=
+  
+  # GEMINI_API_KEY - AI service
+  # Default: "your_gemini_key_here"
+  geminiApiKey: eW91cl9nZW1pbmlfa2V5X2hlcmU=
+  
+  # OPENROUTER_API_KEY - Alternative AI
+  # Default: "your_openrouter_key_here"
+  openrouterApiKey: eW91cl9vcGVucm91dGVyX2tleV9oZXJl
+
+# ========== Ingress Configuration (Optional) ==========
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: todo-chatbot.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: todo-chatbot-tls
+  #    hosts:
+  #      - todo-chatbot.local
+
+# ========== Service Account ==========
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "todo-chatbot-sa"
+
+# ========== RBAC ==========
+rbac:
+  create: true
+
+# ========== Pod Security ==========
+podSecurityContext:
+  runAsNonRoot: false  # PostgreSQL needs root, adjust per service
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+
+# ========== Monitoring & Observability ==========
+monitoring:
+  enabled: false
+  
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+
+# ========== Debugging ==========
+debug:
+  enabled: false
+  logLevel: info

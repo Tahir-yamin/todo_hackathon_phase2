@@ -156,7 +156,7 @@ function DashboardContent() {
                 <Sidebar onTaskCreated={fetchTasks} />
             </div>
 
-            <main className="flex flex-col h-full relative z-10">
+            <main className="flex flex-col h-full overflow-hidden relative z-10">
                 <nav className="px-6 h-16 flex justify-between items-center bg-white/5 backdrop-blur-xl border-b border-white/10 flex-shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.3)] border border-white/10">
@@ -217,7 +217,7 @@ function DashboardContent() {
 
                 <FilterBar onFilterChange={handleFilterChange} />
 
-                <div className="flex-1">
+                <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
                     {view === 'list' ? (
                         <TaskList tasks={filteredTasks} onTaskUpdated={fetchTasks} />
                     ) : (

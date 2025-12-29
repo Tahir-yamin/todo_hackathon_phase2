@@ -218,12 +218,24 @@ class MCPServer:
                 for t in tasks
             ]
             
+            # Format as markdown table for chat display
+            if tasks:
+                markdown_table = "| Title | Priority | Status | Category |\\n"
+                markdown_table += "|-------|----------|--------|----------|\\n"
+                for t in tasks:
+                    title = t.title[:30] + "..." if len(t.title) > 30 else t.title
+                    markdown_table += f"| {title} | {t.priority} | {t.status} | {t.category or 'N/A'} |\\n"
+                formatted_message = f"Found {len(tasks)} task(s):\\n\\n{markdown_table}"
+            else:
+                formatted_message = "You have no tasks at the moment."
+            
             print(f"✅ Listed {len(task_list)} tasks")
             
             return {
                 "success": True,
                 "count": len(task_list),
-                "tasks": task_list
+                "tasks": task_list,
+                "formatted_output": formatted_message
             }
         except Exception as e:
             raise

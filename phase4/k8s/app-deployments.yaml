@@ -1,0 +1,262 @@
+# ===============================================
+# Application Layer - Frontend & Backend
+# ===============================================
+# This file deploys the core application services:
+# 1. Backend (FastAPI) - Internal service
+# 2. Frontend (Next.js) - External access via NodePort
+# ===============================================
+
+---
+# ========== BACKEND (FastAPI) ==========
+
+# 1. Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: todo-chatbot
+  labels:
+    app: backend
+    component: api
+    tier: backend
+spec:
+  replicas: 1  # Start with 1, scale as needed
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero-downtime deployments
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        component: api
+        tier: backend
+    spec:
+      containers:
+        - name: backend
+          image: todo-backend:v1
+          imagePullPolicy: Never  # Uses local Minikube registry
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          
+          # Environment Variables from ConfigMap and Secrets
+          envFrom:
+            - configMapRef:
+                name: todo-config
+            - secretRef:
+                name: todo-secrets
+          
+          # Additional environment variables
+          env:
+            - name: PORT
+              value: "8000"
+            - name: HOST
+              value: "0.0.0.0"
+          
+          # Resource Limits (prevent resource exhaustion)
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          # Liveness Probe (restart if unhealthy)
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness Probe (don't route traffic until ready)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+---
+# 2. Backend Service (ClusterIP - Internal Only)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: todo-chatbot
+  labels:
+    app: backend
+    component: api
+spec:
+  type: ClusterIP  # Internal cluster communication only
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  # This creates DNS: backend-service.todo-chatbot.svc.cluster.local
+
+---
+# ========== FRONTEND (Next.js) ==========
+
+# 3. Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: todo-chatbot
+  labels:
+    app: frontend
+    component: ui
+    tier: frontend
+spec:
+  replicas: 2  # High Availability: Two instances
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero-downtime deployments
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        component: ui
+        tier: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: todo-frontend:v1
+          imagePullPolicy: Never  # Uses local Minikube registry
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          
+          # Environment Variables from ConfigMap and Secrets
+          envFrom:
+            - configMapRef:
+                name: todo-config
+            - secretRef:
+                name: todo-secrets
+          
+          # Additional environment variables
+          env:
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          
+          # Resource Limits
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          # Liveness Probe (Next.js health check)
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness Probe
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+---
+# 4. Frontend Service (NodePort - External Access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: todo-chatbot
+  labels:
+    app: frontend
+    component: ui
+spec:
+  type: NodePort  # Accessible from host machine
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: 30000  # Access via: minikube ip:30000 or localhost:30000
+      protocol: TCP
+  # This creates DNS: frontend-service.todo-chatbot.svc.cluster.local
+
+---
+# ===============================================
+# Horizontal Pod Autoscaler (Optional)
+# ===============================================
+# Uncomment to enable auto-scaling based on CPU usage
+# ===============================================
+
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: frontend-hpa
+#   namespace: todo-chatbot
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: frontend-deployment
+#   minReplicas: 2
+#   maxReplicas: 5
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70
+
+# ---
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: backend-hpa
+#   namespace: todo-chatbot
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: backend-deployment
+#   minReplicas: 1
+#   maxReplicas: 3
+#   metrics:
+#     - type: Resource
+#       resource:
+#         name: cpu
+#         target:
+#           type: Utilization
+#           averageUtilization: 70

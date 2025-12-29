@@ -15,7 +15,6 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const toggleTaskStatus = useCallback(async (task: Task) => {
-    // Prevent multiple rapid clicks
     if (loadingTasks[task.id]) return;
 
     const newStatus = task.status === 'todo' ? 'completed' : 'todo';
@@ -35,11 +34,6 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskUpdated }) => {
   }, [loadingTasks, onTaskUpdated]);
 
   const deleteTask = useCallback(async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) {
-      return;
-    }
-
-    // Prevent multiple rapid clicks
     if (loadingTasks[id]) return;
 
     setLoadingTasks(prev => ({ ...prev, [id]: true }));

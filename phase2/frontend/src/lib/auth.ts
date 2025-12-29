@@ -7,11 +7,12 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "postgresql",
     }),
-    baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3002",
+    // Use BETTER_AUTH_URL from environment, fallback to localhost:3000
+    baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true, // 🔒 MANDATORY: No fake emails allowed!
+        requireEmailVerification: false, // 🔓 Disabled for testing - enable in production!
 
         async sendVerificationEmail({ user, url, token }) {
             // 🖨️ ALWAYS log to terminal (for testing/debugging)
@@ -47,16 +48,21 @@ export const auth = betterAuth({
         },
     },
 
-    socialProviders: {
-        google: {
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        },
-        github: {
-            clientId: process.env.GITHUB_CLIENT_ID!,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-        },
-    },
+    // Social providers - only add if credentials exist
+    socialProviders: process.env.GOOGLE_CLIENT_ID || process.env.GITHUB_CLIENT_ID ? {
+        ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? {
+            google: {
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            }
+        } : {}),
+        ...(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET ? {
+            github: {
+                clientId: process.env.GITHUB_CLIENT_ID,
+                clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            }
+        } : {}),
+    } : undefined,
 
     secret: process.env.BETTER_AUTH_SECRET!,
 

@@ -58,11 +58,30 @@ async def chat_with_ai(
             {
                 "role": "system",
                 "content": (
-                    "You are a helpful task management assistant. "
-                    "Help users manage their to-do list efficiently. "
-                    "When users ask to add, list, update, delete, or complete tasks, use the available tools. "
-                    "If the user says 'complete all tasks' or 'mark everything as done', use the bulk_complete_tasks tool. "
-                    "Be friendly and concise in your responses."
+                    "You are an Action-Oriented Task Management Assistant.\\n\\n"
+                    "IMMEDIATE EXECUTION PROTOCOL:\\n"
+                    "- When a user asks to create, update, or delete a task, EXECUTE THE ACTION IMMEDIATELY using the available tools.\\n"
+                    "- DO NOT ask for confirmation. Just do it.\\n"
+                    "- After the tool executes successfully, you MUST provide clear feedback.\\n\\n"
+                    "FEEDBACK AFTER ACTIONS:\\n"
+                    "- After creating a task: 'I have created the task: [Task Title] with [Priority] priority.'\\n"
+                    "- After deleting a task: 'I have deleted the task: [Task Title].'\\n"
+                    "- After updating a task: 'I have updated the task: [Task Title].'\\n"
+                    "- After completing all tasks: 'I have marked [count] tasks as completed.'\\n"
+                    "- Never show raw JSON or technical details.\\n\\n"
+                    "LISTING TASKS:\\n"
+                    "- When listing tasks, format the output as a markdown table:\\n"
+                    "  | Title | Priority | Status | Category |\\n"
+                    "  |-------|----------|--------|----------|\\n"
+                    "  | Example | High | To Do | Work |\\n\\n"
+                    "BULK OPERATIONS:\\n"
+                    "- If the user says 'complete all tasks' or 'mark everything as done', use the bulk_complete_tasks tool.\\n"
+                    "- If the user says 'delete all tasks', politely explain: 'I can delete specific tasks by ID, but I don\\'t have a bulk delete function yet. Which task would you like me to delete?'\\n\\n"
+                    "IMPORTANT:\\n"
+                    "- Be decisive and action-oriented\\n"
+                    "- Execute immediately without asking permission\\n"
+                    "- Always confirm what you did after the action completes\\n"
+                    "- Be friendly and concise"
                 )
             }
         ]
@@ -126,17 +145,26 @@ async def chat_with_ai(
             # Get final response from AI
             print(f"🔄 Getting final response from AI...")
             second_response = client.chat.completions.create(
-                model="openai/gpt-3.5-turbo",
+                model=os.getenv("AI_MODEL", "deepseek/deepseek-chat"),
                 messages=messages,
                 temperature=0.7
             )
             
             final_message = second_response.choices[0].message.content
+            # Fallback if AI returns empty response
+            if not final_message or final_message.strip() == "":
+                print(f"⚠️ AI returned empty response after tool execution, using fallback")
+                final_message = "Action completed successfully."
         else:
             # No tool calls, use direct response
             final_message = response_message.content
         
-        print(f"✅ AI Response: {final_message[:100]}...")
+        # Final safety check for empty responses
+        if not final_message or final_message.strip() == "":
+            print(f"⚠️ Final message is empty, using fallback")
+            final_message = "I'm here to help! Please let me know what you'd like to do with your tasks."
+        
+        print(f"✅ AI Response: {final_message[:100] if len(final_message) > 100 else final_message}...")
         
         # Get or create conversation
         if request.conversation_id:

@@ -1,0 +1,49 @@
+apiVersion: v2
+name: todo-chatbot
+description: AI-Powered Agentic Todo System - Kubernetes Edition with MCP Integration
+type: application
+
+# Chart version - increment this when you make changes to the chart
+version: 1.0.0
+
+# Application version - the version of the application being deployed
+appVersion: "1.0.0"
+
+# Keywords for discoverability
+keywords:
+  - todo
+  - ai
+  - chatbot
+  - mcp
+  - agentic
+  - fastapi
+  - nextjs
+  - kubernetes
+
+# Maintainers
+maintainers:
+  - name: Tahir Yamin
+    email: tahir@evolution-todo.com
+
+# Home page
+home: https://github.com/tahir-yamin/evolution-todo
+
+# Sources
+sources:
+  - https://github.com/tahir-yamin/evolution-todo
+
+# Icon URL (optional)
+# icon: https://your-icon-url.com/icon.png
+
+# Dependencies (if any)
+# dependencies:
+#   - name: postgresql
+#     version: 12.x.x
+#     repository: https://charts.bitnami.com/bitnami
+
+# Annotations
+annotations:
+  category: Application
+  phase: "4"
+  architecture: microservices
+  ai-enabled: "true"

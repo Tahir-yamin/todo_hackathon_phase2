@@ -1,0 +1,161 @@
+/* Comprehensive Light Mode Overrides */
+
+/* Text color overrides for light mode */
+[data-theme='light'] .text-slate-100 {
+    @apply text-slate-900 !important;
+}
+
+[data-theme='light'] .text-slate-200 {
+    @apply text-slate-800 !important;
+}
+
+[data-theme='light'] .text-slate-300 {
+    @apply text-slate-700 !important;
+}
+
+[data-theme='light'] .text-slate-400 {
+    @apply text-slate-600 !important;
+}
+
+[data-theme='light'] .text-slate-500 {
+    @apply text-slate-500 !important;
+}
+
+/* Badge text colors */
+[data-theme='light'] .text-green-300 {
+    @apply text-green-700 !important;
+}
+
+[data-theme='light'] .text-yellow-300 {
+    @apply text-yellow-700 !important;
+}
+
+[data-theme='light'] .text-orange-300 {
+    @apply text-orange-700 !important;
+}
+
+[data-theme='light'] .text-cyan-300 {
+    @apply text-cyan-700 !important;
+}
+
+[data-theme='light'] .text-cyan-400 {
+    @apply text-cyan-600 !important;
+}
+
+/* Background overrides */
+[data-theme='light'] .bg-slate-800 {
+    @apply bg-white border border-slate-300 !important;
+}
+
+[data-theme='light'] .bg-slate-900 {
+    @apply bg-white !important;
+}
+
+[data-theme='light'] .bg-slate-900\/50 {
+    @apply bg-slate-50 !important;
+}
+
+[data-theme='light'] .bg-slate-900\/70 {
+    @apply bg-slate-100 !important;
+}
+
+[data-theme='light'] .bg-slate-900\/20 {
+    @apply bg-slate-50 !important;
+}
+
+/* Task card background colors */
+[data-theme='light'] .bg-green-900\/10 {
+    @apply bg-green-50 !important;
+}
+
+[data-theme='light'] .bg-yellow-900\/10 {
+    @apply bg-yellow-50 !important;
+}
+
+[data-theme='light'] .bg-orange-900\/10 {
+    @apply bg-orange-50 !important;
+}
+
+[data-theme='light'] .bg-cyan-900\/10 {
+    @apply bg-cyan-50 !important;
+}
+
+[data-theme='light'] .bg-cyan-900\/30 {
+    @apply bg-cyan-100 !important;
+}
+
+[data-theme='light'] .bg-gray-800\/20 {
+    @apply bg-gray-100 !important;
+}
+
+/* Badge backgrounds */
+[data-theme='light'] .bg-green-900\/50 {
+    @apply bg-green-200 !important;
+}
+
+[data-theme='light'] .bg-yellow-900\/50 {
+    @apply bg-yellow-200 !important;
+}
+
+[data-theme='light'] .bg-orange-900\/50 {
+    @apply bg-orange-200 !important;
+}
+
+[data-theme='light'] .bg-gray-700 {
+    @apply bg-gray-200 text-gray-800 !important;
+}
+
+/* Border overrides */
+[data-theme='light'] .border-slate-700 {
+    @apply border-slate-300 !important;
+}
+
+[data-theme='light'] .border-slate-800 {
+    @apply border-slate-200 !important;
+}
+
+[data-theme='light'] .border-slate-700\/50 {
+    @apply border-slate-200 !important;
+}
+
+[data-theme='light'] .border-slate-600 {
+    @apply border-slate-400 !important;
+}
+
+[data-theme='light'] .border-cyan-500\/50 {
+    @apply border-cyan-300 !important;
+}
+
+[data-theme='light'] .border-cyan-500\/30 {
+    @apply border-cyan-200 !important;
+}
+
+/* Hover states */
+[data-theme='light'] .hover\:bg-cyan-900\/20:hover {
+    @apply hover:bg-cyan-50 !important;
+}
+
+[data-theme='light'] .hover\:text-cyan-400:hover {
+    @apply hover:text-cyan-600 !important;
+}
+
+[data-theme='light'] .hover\:text-red-400:hover {
+    @apply hover:text-red-600 !important;
+}
+
+[data-theme='light'] .hover\:border-slate-700:hover {
+    @apply hover:border-slate-400 !important;
+}
+
+/* Placeholder text */
+[data-theme='light'] .placeholder-slate-500::placeholder {
+    @apply placeholder-slate-400 !important;
+}
+
+[data-theme='light'] .placeholder-slate-600::placeholder {
+    @apply placeholder-slate-500 !important;
+}
+
+[data-theme='light'] .placeholder-gray-400::placeholder {
+    @apply placeholder-gray-500 !important;
+}

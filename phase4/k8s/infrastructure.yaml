@@ -1,0 +1,47 @@
+# ===============================================
+# Infrastructure Foundation for todo-chatbot
+# ===============================================
+# This file defines the base infrastructure:
+# 1. Namespace - Isolated environment
+# 2. ConfigMap - Non-sensitive configuration
+# ===============================================
+
+---
+# 1. The Room (Namespace)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: todo-chatbot
+  labels:
+    app: evolution-todo
+    phase: "4"
+    environment: development
+
+---
+# 2. The Configuration (ConfigMap)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-config
+  namespace: todo-chatbot
+  labels:
+    app: evolution-todo
+data:
+  # Frontend Configuration
+  # This tells the Frontend how to find the Backend inside the cluster
+  NEXT_PUBLIC_API_URL: "http://backend-service:8000"
+  NEXT_PUBLIC_APP_URL: "http://localhost:30000"
+  BETTER_AUTH_URL: "http://localhost:30000"
+  TRUSTED_ORIGINS: "http://localhost:30000"
+  
+  # Backend Configuration
+  # This tells the Backend where the database is
+  DATABASE_URL: "postgresql://postgres:postgres@db-service:5432/tododb"
+  CLIENT_URL: "http://localhost:30000"
+  SITE_URL: "http://localhost:30000"
+  
+  # Node Environment
+  NODE_ENV: "production"
+  
+  # Telemetry
+  NEXT_TELEMETRY_DISABLED: "1"

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from '@/lib/auth-client';
 import { Send, MessageSquare, X, Minimize2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
     role: 'user' | 'model';
@@ -25,6 +27,26 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    // Load messages from sessionStorage on mount
+    useEffect(() => {
+        const saved = sessionStorage.getItem('chat_history');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                setMessages(parsed);
+            } catch (e) {
+                console.error('Failed to parse saved messages:', e);
+            }
+        }
+    }, []);
+
+    // Save messages to sessionStorage whenever they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            sessionStorage.setItem('chat_history', JSON.stringify(messages));
+        }
+    }, [messages]);
 
     useEffect(scrollToBottom, [messages]);
 
@@ -63,13 +85,16 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
             if (data.tool_calls && data.tool_calls > 0) {
                 console.log('✅ Task operation completed, refreshing task list...');
 
-                // 🔥 Broadcast global event to trigger dashboard refresh
-                window.dispatchEvent(new CustomEvent('task-update'));
+                // ⏱️ Delay refresh to ensure backend operations complete
+                setTimeout(() => {
+                    // 🔥 Broadcast global event to trigger dashboard refresh
+                    window.dispatchEvent(new CustomEvent('task-update'));
 
-                // Call the callback directly for immediate refresh
-                if (onTaskUpdated) {
-                    onTaskUpdated();
-                }
+                    // Call the callback directly for immediate refresh
+                    if (onTaskUpdated) {
+                        onTaskUpdated();
+                    }
+                }, 500);
             }
         } catch (error) {
             console.error('Chat error:', error);
@@ -157,10 +182,32 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
                                 <div
                                     className={`max-w-[85%] p-3 rounded-lg text-sm ${msg.role === 'user'
                                         ? 'bg-primary text-background-dark'
-                                        : 'bg-background-medium border border-border-subtle text-text-light'
+                                        : 'bg-background-medium border border-border-subtle'
                                         }`}
                                 >
-                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        className="leading-relaxed"
+                                        components={{
+                                            p: ({ node, ...props }) => <p className="mb-2 text-gray-100" {...props} />,
+                                            table: ({ node, ...props }) => (
+                                                <div className="overflow-x-auto my-3">
+                                                    <table className="min-w-full border-collapse border border-cyan-500/50" {...props} />
+                                                </div>
+                                            ),
+                                            thead: ({ node, ...props }) => <thead className="bg-cyan-900/30" {...props} />,
+                                            th: ({ node, ...props }) => (
+                                                <th className="border border-cyan-500/30 px-4 py-2 text-left text-sm font-bold text-cyan-300" {...props} />
+                                            ),
+                                            tbody: ({ node, ...props }) => <tbody className="bg-gray-800/20" {...props} />,
+                                            td: ({ node, ...props }) => (
+                                                <td className="border border-cyan-500/30 px-4 py-2 text-sm text-gray-100" {...props} />
+                                            ),
+                                            tr: ({ node, ...props }) => <tr className="hover:bg-cyan-900/20" {...props} />,
+                                        }}
+                                    >
+                                        {msg.content}
+                                    </ReactMarkdown>
                                 </div>
                             </div>
                         ))}

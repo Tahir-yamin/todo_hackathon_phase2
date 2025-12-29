@@ -1,0 +1,172 @@
+# ===============================================
+# Database Layer - PostgreSQL StatefulSet
+# ===============================================
+# This file implements persistent storage for PostgreSQL:
+# 1. PersistentVolumeClaim - Disk storage request
+# 2. Service - Internal network endpoint (Headless)
+# 3. StatefulSet - Stateful database pod
+#
+# Why StatefulSet?
+# - Stable network identity (postgres-0)
+# - Persistent storage that survives pod restarts
+# - Ordered deployment and scaling
+# ===============================================
+
+---
+# 1. The Disk Request (PVC)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: todo-chatbot
+  labels:
+    app: postgres
+    component: database
+spec:
+  accessModes:
+    - ReadWriteOnce  # Single node read-write access
+  resources:
+    requests:
+      storage: 1Gi  # Request 1GB of persistent storage
+  # storageClassName: standard  # Uncomment for specific storage class
+
+---
+# 2. The Database Service (Internal Network)
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: todo-chatbot
+  labels:
+    app: postgres
+    component: database
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+  clusterIP: None  # Headless service for StatefulSets
+  # This creates a stable DNS entry: postgres-0.db-service.todo-chatbot.svc.cluster.local
+
+---
+# 3. The Database Engine (StatefulSet)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: todo-chatbot
+  labels:
+    app: postgres
+    component: database
+spec:
+  serviceName: "db-service"
+  replicas: 1  # Single instance for development
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          
+          # Environment Variables
+          env:
+            - name: POSTGRES_DB
+              value: tododb
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres  # TODO: Move to Secret in production
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata  # Avoid permission issues
+          
+          # Volume Mounts
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+          
+          # Resource Limits (prevents resource exhaustion)
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          
+          # Liveness Probe (restart if unhealthy)
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U postgres -d tododb
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          # Readiness Probe (don't route traffic until ready)
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U postgres -d tododb
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      
+      # Volumes
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+      
+      # Restart Policy
+      restartPolicy: Always
+
+---
+# ===============================================
+# Database Initialization Job (Optional)
+# ===============================================
+# This Job runs Prisma migrations after the database is ready
+# Uncomment when Prisma schema is finalized
+# ===============================================
+
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: db-init
+#   namespace: todo-chatbot
+# spec:
+#   template:
+#     spec:
+#       containers:
+#         - name: prisma-migrate
+#           image: todo-frontend:v1
+#           command:
+#             - /bin/sh
+#             - -c
+#             - npx prisma db push
+#           env:
+#             - name: DATABASE_URL
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: todo-config
+#                   key: DATABASE_URL
+#       restartPolicy: OnFailure

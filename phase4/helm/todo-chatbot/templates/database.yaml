@@ -1,0 +1,118 @@
+{{ if .Values.database.enabled }}
+---
+# PersistentVolumeClaim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    app: postgres
+    component: database
+spec:
+  accessModes:
+    - {{ .Values.database.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.database.persistence.size }}
+  {{- if .Values.database.persistence.storageClass }}
+  storageClassName: {{ .Values.database.persistence.storageClass }}
+  {{- end }}
+
+---
+# Headless Service for StatefulSet
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-chatbot.database.serviceName" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    app: postgres
+    component: database
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: {{ .Values.database.service.port }}
+      targetPort: {{ .Values.database.service.port }}
+      protocol: TCP
+  clusterIP: None  # Headless service for StatefulSet
+
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    app: postgres
+    component: database
+spec:
+  serviceName: {{ include "todo-chatbot.database.serviceName" . }}
+  replicas: {{ .Values.database.replicaCount }}
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.database.service.port }}
+              protocol: TCP
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.database.auth.database }}
+            - name: POSTGRES_USER
+              value: {{ .Values.database.auth.username }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.database.auth.password }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+          resources:
+            {{- toYaml .Values.database.resources | nindent 12 }}
+          {{- if .Values.database.livenessProbe.enabled }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+            initialDelaySeconds: {{ .Values.database.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.database.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.database.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.database.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.database.readinessProbe.enabled }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+            initialDelaySeconds: {{ .Values.database.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.database.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.database.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.database.readinessProbe.failureThreshold }}
+          {{- end }}
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+      restartPolicy: Always
+{{ end }}
