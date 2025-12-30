@@ -1,5 +1,5 @@
 # STAGE 1: Dependencies
-FROM node:20-slim AS deps
+FROM node:25-slim AS deps
 RUN apt-get update && apt-get install -y openssl ca-certificates
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY phase2/frontend/prisma ./prisma/
 RUN for i in 1 2 3; do npm install && break || sleep 5; done
 
 # STAGE 2: Builder
-FROM node:20-slim AS builder
+FROM node:25-slim AS builder
 WORKDIR /app
 
 # Copy dependencies from deps stage
@@ -43,7 +43,7 @@ RUN npm run build
 RUN mkdir -p public
 
 # STAGE 3: Runner
-FROM node:20-slim AS runner
+FROM node:25-slim AS runner
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
