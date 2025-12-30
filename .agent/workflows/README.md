@@ -4,7 +4,7 @@ description: Index of all available workflows for troubleshooting and developmen
 
 # Workflows Index
 
-**Total Workflows**: 13  
+**Total Workflows**: 18  
 **Location**: `.agent/workflows/`
 
 ---
@@ -39,6 +39,11 @@ description: Index of all available workflows for troubleshooting and developmen
 **Use when**: Moving to production, deploying to cloud, SSL issues  
 **Includes**: Pre-deployment checklist, migration process, rollback plan
 
+### 8. [Security Audit](./security-audit.md) 🔐
+**Use when**: Before deployment, before committing code, regular audits  
+**Fixes**: API key exposure, secrets in ConfigMap, Git history cleanup  
+**Includes**: Credential scanning, sealed-secrets, pre-commit hooks
+
 ---
 
 ## 🚀 Development Workflows (5)
@@ -71,6 +76,10 @@ description: Index of all available workflows for troubleshooting and developmen
 **Use when**: Adding new workflows, skills, design specs, or requirements  
 **Includes**: Creating workflows, updating skills, design system, prompts  
 **Special**: This is the workflow for updating the documentation system itself!
+
+### 14. [GitHub Best Practices](./github-best-practices.md)
+**Use when**: Setting up new repos, auditing security, configuring CI/CD
+**Special**: Fully autonomous workflow with auto-approval for fixes
 
 ---
 
@@ -106,17 +115,6 @@ Browse this file to find the right workflow for your problem.
 | App is slow | performance-problems |
 | Deploying to production | deployment-issues |
 | Starting fresh project | starting-new-project |
-| Adding feature | adding-new-feature |
-| Before deployment | code-review-testing |
-| Setting up dev environment | environment-setup |
-| Changing database | database-schema-changes |
-| **Updating documentation** | **documentation-maintenance** ⭐ |
-
----
-
-## ⚡ Workflows with Auto-Run (// turbo)
-
-These workflows have steps that can be auto-run:
 - authentication-issues (validate-env.ps1)
 - docker-container-problems (docker-compose commands)
 - database-connection-issues (connection tests)

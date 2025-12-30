@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # ===============================================
+  # NO LOCAL DATABASE - Using Cloud NeonDB!
+  # ===============================================
+
+  # Backend (FastAPI)
+  backend:
+    build:
+      context: .
+      dockerfile: phase4/docker/backend.Dockerfile
+    container_name: todo-backend
+    image: todo-backend:v1
+    ports:
+      - "8000:8000"
+    environment:
+      # NeonDB Cloud Database
+      - DATABASE_URL=postgresql://neondb_owner:npg_LDWBY2FaORu5@ep-curly-dust-ahteg33k-pooler.c-3.us-east-1.aws.neon.tech/Tahir_yamin_Challenge2DB?sslmode=require&channel_binding=require
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=ZxDEHgazFXUefS5qwnkoBOGPjIl9bv81
+    networks:
+      - todo-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: phase4/docker/frontend.Dockerfile
+    container_name: todo-frontend
+    image: todo-frontend:v1
+    ports:
+      - "3000:3000"
+    environment:
+      # NeonDB Cloud Database (same as backend)
+      - DATABASE_URL=postgresql://neondb_owner:npg_LDWBY2FaORu5@ep-curly-dust-ahteg33k-pooler.c-3.us-east-1.aws.neon.tech/Tahir_yamin_Challenge2DB?sslmode=require&channel_binding=require
+
+      # Better Auth Configuration
+      - BETTER_AUTH_SECRET=ZxDEHgazFXUefS5qwnkoBOGPjIl9bv81
+      - BETTER_AUTH_URL=http://localhost:3000
+      - TRUSTED_ORIGINS=http://localhost:3000
+
+      # Backend API
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+
+      # Legacy NextAuth
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=ZxDEHgazFXUefS5qwnkoBOGPjIl9bv81
+
+      # Environment
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      - backend
+    networks:
+      - todo-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  todo-network:
+    driver: bridge
