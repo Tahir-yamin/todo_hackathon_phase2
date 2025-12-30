@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "agent_name": "Evolution-Architect",
     "description": "Agentic Tool Hub for the Evolution of Todo project - Phase 4 Kubernetes deployment",
     "protocol": "MCP (Model Context Protocol)",
@@ -91,6 +91,13 @@
             "description": "Performs a comprehensive health check across all services.",
             "risk_level": "safe",
             "parameters": {}
+        },
+        {
+            "name": "verify_neondb_ssl",
+            "category": "database",
+            "description": "Verifies that the backend is connecting to NeonDB with SSL enabled.",
+            "risk_level": "safe",
+            "parameters": {}
         }
     ],
     "workflow_patterns": {
@@ -116,12 +123,21 @@
                 "k8s_cluster_status",
                 "scale_deployment"
             ]
+        },
+        "database_troubleshooting": {
+            "trigger": "db_connection_error",
+            "steps": [
+                "verify_neondb_ssl",
+                "db_query_stats",
+                "analyze_pod_logs"
+            ]
         }
     },
     "safety_rules": [
         "Never scale above 5 replicas in local Minikube",
         "Always check cluster status before performing destructive actions",
         "Log all tool executions with timestamps",
-        "Require explicit confirmation for restart_deployment"
+        "Require explicit confirmation for restart_deployment",
+        "Ensure SSL is enabled for all production database connections"
     ]
 }

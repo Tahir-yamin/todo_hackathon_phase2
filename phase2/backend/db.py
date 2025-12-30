@@ -15,8 +15,12 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
-# Create the engine for PostgreSQL
-engine = create_engine(DATABASE_URL)
+# Create the engine for PostgreSQL with NeonDB optimizations
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,
+    connect_args={"sslmode": "require"}
+)
 
 
 def create_db_and_tables():

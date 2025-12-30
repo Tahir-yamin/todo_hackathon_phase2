@@ -22,11 +22,8 @@ Write-Host "   Kubernetes: v1.28.3" -ForegroundColor Gray
 
 try {
     # Start Minikube with optimal configuration
-    minikube start `
-        --cpus=4 `
-        --memory=4096 `
-        --driver=docker `
-        --kubernetes-version=v1.28.3
+    minikube start --cpus=4 --memory=4096 --driver=docker --kubernetes-version=v1.28.3
+
     
     Write-Host "✅ Minikube started successfully" -ForegroundColor Green
 }
