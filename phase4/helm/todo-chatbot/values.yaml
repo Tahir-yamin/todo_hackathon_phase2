@@ -8,8 +8,13 @@
 # ========== Global Configuration ==========
 namespace: todo-chatbot
 
+# Dapr Configuration
+dapr:
+  enabled: true
+  pubsubName: kafka-pubsub
+
 # Image pull policy for all containers
-imagePullPolicy: Never  # Use "IfNotPresent" for production
+imagePullPolicy: IfNotPresent
 
 # Resource defaults (can be overridden per service)
 resources:
@@ -186,6 +191,47 @@ frontend:
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 70
+
+# ========== Notification Service Configuration (Phase 5) ==========
+notificationService:
+  enabled: true
+  replicaCount: 1
+  
+  image:
+    repository: notification-service
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  # Container port
+  containerPort: 8001
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8001
+    targetPort: 8001
+  
+  # Resource limits
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  
+  # Health probes
+  livenessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  
+  readinessProbe:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 5
 
 # ========== Configuration (ConfigMap) ==========
 config:

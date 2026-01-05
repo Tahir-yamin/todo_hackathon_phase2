@@ -1,0 +1,82 @@
+{{ if .Values.notificationService.enabled }}
+---
+# Notification Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-notification
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    app: notification-service
+spec:
+  replicas: {{ .Values.notificationService.replicaCount }}
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      annotations:
+        dapr.io/enabled: {{ .Values.dapr.enabled | quote }}
+        dapr.io/app-id: "notification-service"
+        dapr.io/app-port: {{ .Values.notificationService.containerPort | quote }}
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: "{{ .Values.notificationService.image.repository }}:{{ .Values.notificationService.image.tag }}"
+          imagePullPolicy: {{ .Values.notificationService.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.notificationService.containerPort }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+            - secretRef:
+                name: {{ .Release.Name }}-secrets
+          env:
+            - name: PORT
+              value: {{ .Values.notificationService.containerPort | quote }}
+            - name: DAPR_PUBSUB_NAME
+              value: {{ .Values.dapr.pubsubName | quote }}
+          resources:
+            {{- toYaml .Values.notificationService.resources | nindent 12 }}
+          {{- if .Values.notificationService.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.notificationService.livenessProbe.path }}
+              port: {{ .Values.notificationService.containerPort }}
+            initialDelaySeconds: {{ .Values.notificationService.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notificationService.livenessProbe.periodSeconds }}
+          {{- end }}
+          {{- if .Values.notificationService.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.notificationService.readinessProbe.path }}
+              port: {{ .Values.notificationService.containerPort }}
+            initialDelaySeconds: {{ .Values.notificationService.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.notificationService.readinessProbe.periodSeconds }}
+          {{- end }}
+
+---
+# Notification Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    app: notification-service
+spec:
+  type: {{ .Values.notificationService.service.type }}
+  selector:
+    app: notification-service
+  ports:
+    - name: http
+      port: {{ .Values.notificationService.service.port }}
+      targetPort: {{ .Values.notificationService.service.targetPort }}
+      protocol: TCP
+{{ end }}

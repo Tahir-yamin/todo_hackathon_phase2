@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+from pydantic import field_validator
 import uuid
+import json
 
 # --- User Models ---
 class UserBase(SQLModel):
@@ -23,15 +25,22 @@ class UserPublic(UserBase):
     createdAt: datetime
     updatedAt: datetime
 
-# --- Task Models ---
+# --- Task Models (Phase 5 Enhanced) ---
 class TaskBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=1000)
-    priority: str = Field(default="medium")
+    priority: str = Field(default="medium")  # high, medium, low
     due_date: Optional[datetime] = Field(default=None)
     status: str = Field(default="todo")
     category: Optional[str] = Field(default="Personal")
-    tags: Optional[str] = Field(default="")
+    tags: Optional[str] = Field(default="")  # Comma-separated tags
+    
+    # Phase 5: Recurrence fields
+    recurrence_type: Optional[str] = Field(default=None)  # NONE, DAILY, WEEKLY, MONTHLY, YEARLY
+    recurrence_details: Optional[str] = Field(default=None)  # JSON string for complex rules
+    
+    # Phase 5: Reminder field
+    remind_at: Optional[datetime] = Field(default=None)  # When to send reminder
 
 class Task(TaskBase, table=True):
     __tablename__ = "Task"
@@ -40,6 +49,10 @@ class Task(TaskBase, table=True):
     completed_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Phase 5: Next occurrence for recurring tasks
+    next_occurrence_at: Optional[datetime] = Field(default=None)
+    last_triggered_at: Optional[datetime] = Field(default=None)
 
 class TaskCreate(TaskBase):
     pass
@@ -50,12 +63,33 @@ class TaskUpdate(SQLModel):
     priority: Optional[str] = None
     status: Optional[str] = None
     due_date: Optional[datetime] = None
+    category: Optional[str] = None
+    tags: Optional[str] = None
+    
+    # Phase 5: Recurrence updates
+    recurrence_type: Optional[str] = None
+    recurrence_details: Optional[str] = None
+    remind_at: Optional[datetime] = None
 
 class TaskPublic(TaskBase):
     id: str
     user_id: str
     created_at: datetime
     updated_at: datetime
+    next_occurrence_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+
+# --- Task Filter Model (Phase 5) ---
+class TaskFilter(SQLModel):
+    """Filter parameters for listing tasks."""
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    due_before: Optional[datetime] = None
+    due_after: Optional[datetime] = None
+    tags: Optional[str] = None  # Comma-separated tags to filter
+    has_recurrence: Optional[bool] = None
+    sort_by: str = "created_at"  # created_at, due_date, priority, title
+    sort_order: str = "desc"  # asc, desc
 
 # --- Chat Models ---
 class Conversation(SQLModel, table=True):
@@ -73,3 +107,4 @@ class Message(SQLModel, table=True):
     role: str
     content: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
+

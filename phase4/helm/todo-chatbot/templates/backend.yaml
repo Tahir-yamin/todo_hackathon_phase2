@@ -23,6 +23,10 @@ spec:
       app: backend
   template:
     metadata:
+      annotations:
+        dapr.io/enabled: {{ .Values.dapr.enabled | quote }}
+        dapr.io/app-id: "backend"
+        dapr.io/app-port: {{ .Values.backend.containerPort | quote }}
       labels:
         app: backend
         component: api

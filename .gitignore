@@ -49,3 +49,10 @@ Thumbs.db
 phase4/scripts/key.txt
 **/*.key
 **/key.txt
+
+# Cloned external repositories (Phase 5)
+claude-skills-library/
+claude-subagents/
+dapr-quickstarts/
+claude-cookbooks/
+my-dev-knowledge-base/

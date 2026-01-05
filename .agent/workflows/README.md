@@ -4,9 +4,9 @@ description: Index of all available workflows for troubleshooting and developmen
 
 # Workflows Index
 
-**Total Workflows**: 22  
+**Total Workflows**: 24  
 **Location**: `.agent/workflows/`  
-**Last Updated**: December 30, 2025
+**Last Updated**: January 5, 2026
 
 ---
 
@@ -50,6 +50,11 @@ description: Index of all available workflows for troubleshooting and developmen
 **Fixes**: Pod failures, service connectivity, ConfigMap issues, SSL errors  
 **Includes**: Comprehensive Phase 4 deployment troubleshooting, real-world issues
 
+### 10. [Phase V Troubleshooting](./phase5-troubleshooting.md) 🚀
+**Use when**: Phase 5 Kafka, Dapr, or AKS cloud deployment issues  
+**Fixes**: Dapr sidecar injection, Kafka/Strimzi issues, ACR pull errors  
+**Includes**: Dapr debugging, Kafka topic creation, GitHub Actions CI/CD
+
 ---
 
 ## 🚀 Development Workflows (5)
@@ -73,6 +78,11 @@ description: Index of all available workflows for troubleshooting and developmen
 ### 14. [Database Schema Changes](./database-schema-changes.md)
 **Use when**: Adding tables, modifying columns, migrations  
 **Includes**: Safe migration process, rollback plan, monitoring
+
+### 20. [Skill Upgrade](./skill-upgrade.md) 🚀
+**Use when**: Planning your 2025 learning journey  
+**Includes**: Roadmap execution, deep dive steps, learning projects  
+**Special**: Guides you from "Practitioner" to "Architect" level
 
 ---
 
@@ -139,6 +149,9 @@ Browse this file to find the right workflow for your problem.
 | **Need full QA test** | **complete-application-qa** |
 | **GitHub security alerts** | **security-remediation** |
 | **API keys exposed** | **security-audit** |
+| **Dapr sidecar issues** | **phase5-troubleshooting** |
+| **Kafka/Strimzi errors** | **phase5-troubleshooting** |
+| **AKS deployment fails** | **phase5-troubleshooting** |
 
 ---
 

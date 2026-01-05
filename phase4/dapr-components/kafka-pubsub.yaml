@@ -1,0 +1,76 @@
+# Dapr Pub/Sub Component for Kafka
+#
+# This component configures Dapr to use Kafka for publish/subscribe messaging.
+# Used for Phase 5 event-driven architecture.
+#
+# Source: Phase 5 Implementation Plan
+# Reference: https://docs.dapr.io/reference/components-reference/supported-pubsub/setup-apache-kafka/
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+  namespace: todo-chatbot
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    # Kafka broker addresses (Strimzi internal service)
+    - name: brokers
+      value: "todo-kafka-kafka-bootstrap.kafka:9092"
+    
+    # Consumer group for this service
+    - name: consumerGroup
+      value: "todo-backend"
+    
+    # Disable auth for internal cluster communication
+    - name: authRequired
+      value: "false"
+    
+    # Client ID for tracing
+    - name: clientID
+      value: "todo-backend-dapr"
+    
+    # Initial offset for new consumer groups
+    - name: initialOffset
+      value: "newest"
+    
+    # Maximum message size (1MB)
+    - name: maxMessageBytes
+      value: "1048576"
+    
+    # Disable TLS for internal communication
+    - name: disableTls
+      value: "true"
+
+---
+# For Redpanda Cloud (external Kafka-compatible)
+# Uncomment this block and comment the above if using Redpanda Cloud
+#
+# apiVersion: dapr.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: kafka-pubsub
+#   namespace: todo-chatbot
+# spec:
+#   type: pubsub.kafka
+#   version: v1
+#   metadata:
+#     - name: brokers
+#       secretKeyRef:
+#         name: kafka-secrets
+#         key: brokers
+#     - name: authType
+#       value: "password"
+#     - name: saslUsername
+#       secretKeyRef:
+#         name: kafka-secrets
+#         key: username
+#     - name: saslPassword
+#       secretKeyRef:
+#         name: kafka-secrets
+#         key: password
+#     - name: saslMechanism
+#       value: "SCRAM-SHA-256"
+#     - name: consumerGroup
+#       value: "todo-backend"

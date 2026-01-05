@@ -1,0 +1,62 @@
+# Dapr State Store Component using PostgreSQL
+#
+# This component allows Dapr to store state in our existing NeonDB PostgreSQL.
+# Used for conversation state and task caching.
+#
+# Source: Phase 5 Implementation Plan
+# Reference: https://docs.dapr.io/reference/components-reference/supported-state-stores/setup-postgresql/
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+  namespace: todo-chatbot
+spec:
+  type: state.postgresql
+  version: v1
+  metadata:
+    # Connection string from Kubernetes Secret
+    - name: connectionString
+      secretKeyRef:
+        name: todo-secrets
+        key: DATABASE_URL
+    
+    # Table name for state storage
+    - name: tableName
+      value: "dapr_state"
+    
+    # Key prefix (optional)
+    - name: keyPrefix
+      value: "todo"
+    
+    # Metadata prefix for tracking
+    - name: metadataTableName
+      value: "dapr_metadata"
+    
+    # Cleanup interval (24 hours in seconds)
+    - name: cleanupIntervalInSeconds
+      value: "86400"
+    
+    # Actor state store settings
+    - name: actorStateStore
+      value: "true"
+
+---
+# Alternative: Redis State Store (for faster caching)
+# Uncomment if you want to use Redis instead of PostgreSQL
+#
+# apiVersion: dapr.io/v1alpha1
+# kind: Component
+# metadata:
+#   name: statestore
+#   namespace: todo-chatbot
+# spec:
+#   type: state.redis
+#   version: v1
+#   metadata:
+#     - name: redisHost
+#       value: "redis:6379"
+#     - name: redisPassword
+#       value: ""
+#     - name: actorStateStore
+#       value: "true"
