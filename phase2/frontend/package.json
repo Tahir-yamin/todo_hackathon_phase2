@@ -37,7 +37,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
-    "autoprefixer": "^10.4.22",
+    "autoprefixer": "^10.4.23",
     "husky": "^9.1.7",
     "prisma": "^7.2.0",
     "typescript": "^5.0.0"
