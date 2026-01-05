@@ -104,25 +104,6 @@ const getAuthHeaders = async () => {
   return {
     'Content-Type': 'application/json',
     ...(userId && { 'X-User-ID': userId }),
-  };
-};
-```
-
----
-
-## Testing Strategies
-
-### 1. Autonomous QA Workflow
-
-- **Tool**: `/complete-application-qa`
-- **Focus**: Infrastructure, Config, Auth, Features
-- **Protocol**: Self-examination and auto-resolution
-
-### 2. API Testing
-
-```python
-def test_create_task():
-    response = client.post('/api/tasks/', json={
         'title': 'Test Task',
         'priority': 'high'
     })
@@ -143,3 +124,19 @@ def test_create_task():
 **Last Updated**: 2025-12-30  
 **Version**: 3.0 - Kubernetes Ready  
 **Status**: ✅ Complete Implementation
+
+---
+
+## 🔮 Future Skills (2025 Roadmap)
+
+We have mapped out a comprehensive path to elevate from "Cloud-Native Practitioner" to "Enterprise Architect".
+
+### Skill Upgrade Roadmap (2025)
+- **[Path 0: Core Stack Upgrade](./SKILL_PATH_0_CORE_STACK.md)**: Next.js 15, FastAPI Advanced, Postgres Performance
+- **[Path A: Advanced DevOps](./SKILL_PATH_A_DEVOPS.md)**: GitOps (ArgoCD), Observability (Prometheus/Grafana)
+- **[Path B: AI Engineering](./SKILL_PATH_B_AI_ENGINEERING.md)**: RAG Systems, Agentic Workflows (AutoGen)
+- **[Path C: Enterprise Architecture](./SKILL_PATH_C_ARCHITECTURE.md)**: Event-Driven (Kafka), Dapr, Microservices
+
+### [Recommended Repositories](./RECOMMENDED_REPOS.md)
+- Deep dives into `vercel/next.js`, `argoproj/argo-cd`, `langchain-ai/langchain`, and more.
+

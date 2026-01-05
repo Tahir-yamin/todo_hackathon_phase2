@@ -16,11 +16,32 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
 # Create the engine for PostgreSQL with NeonDB optimizations
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    connect_args={"sslmode": "require"}
-)
+# Note: sslmode is only supported by psycopg2, not asyncpg or other drivers
+engine = None
+try:
+    # Try with sslmode for psycopg2 (production with NeonDB)
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,
+        connect_args={"sslmode": "require"}
+    )
+    # Test connection to verify it works
+    with engine.connect() as conn:
+        pass
+except TypeError:
+    # Fallback without sslmode for other drivers (local testing)
+    print("⚠️ sslmode not supported by driver, using fallback")
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True
+    )
+except Exception as e:
+    # If DATABASE_URL connection fails, still create engine (might work later)
+    print(f"⚠️ Database connection test failed: {e}")
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True
+    )
 
 
 def create_db_and_tables():

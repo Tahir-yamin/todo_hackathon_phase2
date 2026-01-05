@@ -4,12 +4,13 @@ description: Index of all available workflows for troubleshooting and developmen
 
 # Workflows Index
 
-**Total Workflows**: 18  
-**Location**: `.agent/workflows/`
+**Total Workflows**: 24  
+**Location**: `.agent/workflows/`  
+**Last Updated**: January 5, 2026
 
 ---
 
-## 🚨 Troubleshooting Workflows (7)
+## 🚨 Troubleshooting Workflows (8)
 
 ### 1. [Build Failures](./build-failures.md)
 **Use when**: npm build, Docker build, TypeScript errors, dependency issues  
@@ -44,42 +45,71 @@ description: Index of all available workflows for troubleshooting and developmen
 **Fixes**: API key exposure, secrets in ConfigMap, Git history cleanup  
 **Includes**: Credential scanning, sealed-secrets, pre-commit hooks
 
+### 9. [Kubernetes Deployment Testing](./kubernetes-deployment-testing.md) ☸️
+**Use when**: Phase 4 Kubernetes deployment issues, Helm chart problems  
+**Fixes**: Pod failures, service connectivity, ConfigMap issues, SSL errors  
+**Includes**: Comprehensive Phase 4 deployment troubleshooting, real-world issues
+
+### 10. [Phase V Troubleshooting](./phase5-troubleshooting.md) 🚀
+**Use when**: Phase 5 Kafka, Dapr, or AKS cloud deployment issues  
+**Fixes**: Dapr sidecar injection, Kafka/Strimzi issues, ACR pull errors  
+**Includes**: Dapr debugging, Kafka topic creation, GitHub Actions CI/CD
+
 ---
 
 ## 🚀 Development Workflows (5)
 
-### 8. [Starting New Project](./starting-new-project.md)
+### 10. [Starting New Project](./starting-new-project.md)
 **Use when**: Beginning new full-stack application  
 **Includes**: Project structure, Git setup, environment configuration
 
-### 9. [Adding New Feature](./adding-new-feature.md)
+### 11. [Adding New Feature](./adding-new-feature.md)
 **Use when**: Implementing new functionality, creating API endpoints  
 **Includes**: Planning, backend, frontend, testing, integration
 
-### 10. [Code Review & Testing](./code-review-testing.md)
+### 12. [Code Review & Testing](./code-review-testing.md)
 **Use when**: Before deploying, PR review, QA testing  
 **Includes**: Quality checklist, security check, performance testing
 
-### 11. [Environment Setup](./environment-setup.md)
+### 13. [Environment Setup](./environment-setup.md)
 **Use when**: Onboarding new devs, fresh machine, setting up CI/CD  
 **Includes**: Prerequisites, clone, dependencies, validation
 
-### 12. [Database Schema Changes](./database-schema-changes.md)
+### 14. [Database Schema Changes](./database-schema-changes.md)
 **Use when**: Adding tables, modifying columns, migrations  
 **Includes**: Safe migration process, rollback plan, monitoring
 
+### 20. [Skill Upgrade](./skill-upgrade.md) 🚀
+**Use when**: Planning your 2025 learning journey  
+**Includes**: Roadmap execution, deep dive steps, learning projects  
+**Special**: Guides you from "Practitioner" to "Architect" level
+
 ---
 
-## 📚 Meta Workflow (1)
+## 📚 Meta & DevOps Workflows (7)
 
-### 13. [Documentation Maintenance](./documentation-maintenance.md) ⭐
+### 15. [Documentation Maintenance](./documentation-maintenance.md) ⭐
 **Use when**: Adding new workflows, skills, design specs, or requirements  
 **Includes**: Creating workflows, updating skills, design system, prompts  
 **Special**: This is the workflow for updating the documentation system itself!
 
-### 14. [GitHub Best Practices](./github-best-practices.md)
+### 16. [GitHub Best Practices](./github-best-practices.md)
 **Use when**: Setting up new repos, auditing security, configuring CI/CD
 **Special**: Fully autonomous workflow with auto-approval for fixes
+
+### 17. [Security Remediation](./security-remediation.md) 🛡️
+**Use when**: GitHub security alerts, Dependabot alerts, code scanning issues
+**Fixes**: Exposed secrets, vulnerability patches, dependency updates
+**Includes**: Automated remediation steps, alert management
+
+### 18. [Complete Application QA](./complete-application-qa.md) ✅
+**Use when**: End-to-end testing, pre-submission QA, comprehensive validation
+**Includes**: Auth testing, CRUD operations, AI chatbot, deployment verification
+**Special**: Autonomous self-examination and auto-resolution workflow
+
+### 19. [QA Kanban](./qa-kanban.md) 📋
+**Use when**: Testing Kanban board functionality specifically
+**Includes**: Board creation, task movement, status validation
 
 ---
 
@@ -115,6 +145,20 @@ Browse this file to find the right workflow for your problem.
 | App is slow | performance-problems |
 | Deploying to production | deployment-issues |
 | Starting fresh project | starting-new-project |
+| **Kubernetes pods failing** | **kubernetes-deployment-testing** |
+| **Need full QA test** | **complete-application-qa** |
+| **GitHub security alerts** | **security-remediation** |
+| **API keys exposed** | **security-audit** |
+| **Dapr sidecar issues** | **phase5-troubleshooting** |
+| **Kafka/Strimzi errors** | **phase5-troubleshooting** |
+| **AKS deployment fails** | **phase5-troubleshooting** |
+
+---
+
+## ⚡ Workflows with // turbo (Auto-Run Commands)
+
+These workflows have steps that are safe to auto-run:
+
 - authentication-issues (validate-env.ps1)
 - docker-container-problems (docker-compose commands)
 - database-connection-issues (connection tests)
@@ -122,6 +166,7 @@ Browse this file to find the right workflow for your problem.
 - starting-new-project (git init, installs)
 - environment-setup (installs, validation)
 - database-schema-changes (migrations)
+- **kubernetes-deployment-testing** (kubectl checks)
 
 ---
 
