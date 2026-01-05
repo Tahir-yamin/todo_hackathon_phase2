@@ -1,4 +1,4 @@
-# Frontend Dockerfile
+# Frontend Dockerfile - Next.js Standalone Mode
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -10,23 +10,19 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the app
+# Build the app with standalone output
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine
+# Production stage - Standalone mode doesn't need npm!
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy package files and install production dependencies only
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-# Copy built assets from builder
+# Copy the standalone output (includes all dependencies)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
