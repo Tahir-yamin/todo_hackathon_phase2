@@ -33,7 +33,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Copy the standalone output (includes all dependencies)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
 # Expose port
 EXPOSE 3000
