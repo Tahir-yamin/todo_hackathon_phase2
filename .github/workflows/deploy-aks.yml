@@ -221,26 +221,16 @@ jobs:
         with:
           version: 'v3.14.0'
       
-      - name: Clean up existing namespace (if any)
+      - name: Ensure namespace exists
         run: |
-          if kubectl get namespace ${{ env.NAMESPACE }} 2>/dev/null; then
-            echo "🧹 Deleting existing namespace..."
-            kubectl delete namespace ${{ env.NAMESPACE }} --timeout=60s || true
-            echo "⏳ Waiting for namespace deletion..."
-            sleep 10
-            # Wait until namespace is completely gone
-            while kubectl get namespace ${{ env.NAMESPACE }} 2>/dev/null; do
-              echo "Still deleting... waiting 5s"
-              sleep 5
-            done
-            echo "✅ Namespace deleted successfully"
-          fi
+          # Create namespace if it doesn't exist (idempotent)
+          kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+          echo "✅ Namespace ready"
       
       - name: Deploy with Helm
         run: |
           helm upgrade --install todo-chatbot ./phase4/helm/todo-chatbot \
             --namespace ${{ env.NAMESPACE }} \
-            --create-namespace \
             --set backend.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/todo-backend \
             --set backend.image.tag=${{ needs.build.outputs.backend_tag }} \
             --set frontend.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/todo-frontend \
