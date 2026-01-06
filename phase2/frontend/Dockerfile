@@ -1,6 +1,9 @@
 # Frontend Dockerfile - Next.js Standalone Mode
 FROM node:20-alpine AS builder
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy package files
