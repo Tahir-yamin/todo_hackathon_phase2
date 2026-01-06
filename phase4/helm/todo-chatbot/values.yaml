@@ -69,14 +69,14 @@ database:
   # Health probes
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 120
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3
   
   readinessProbe:
     enabled: true
-    initialDelaySeconds: 10
+    initialDelaySeconds: 120
     periodSeconds: 5
     timeoutSeconds: 3
     failureThreshold: 3
@@ -141,7 +141,7 @@ backend:
 # ========== Frontend Configuration (Next.js) ==========
 frontend:
   enabled: true
-  replicaCount: 2  # High availability with 2 replicas
+  replicaCount: 1
   
   image:
     repository: todo-frontend
