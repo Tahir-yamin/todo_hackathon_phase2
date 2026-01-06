@@ -85,7 +85,7 @@ backend:
   image:
     repository: todo-backend
     tag: v1
-    pullPolicy: Never  # Use "IfNotPresent" for production
+    pullPolicy: IfNotPresent
   
   # Container port
   containerPort: 8000
@@ -142,7 +142,7 @@ frontend:
   image:
     repository: todo-frontend
     tag: v1
-    pullPolicy: Never  # Use "IfNotPresent" for production
+    pullPolicy: IfNotPresent
   
   # Container port
   containerPort: 3000
