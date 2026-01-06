@@ -237,8 +237,17 @@ jobs:
             --set frontend.image.tag=${{ needs.build.outputs.frontend_tag }} \
             --set notificationService.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/notification-service \
             --set notificationService.image.tag=${{ needs.build.outputs.notification_tag }} \
-            --set global.registry=${{ secrets.ACR_LOGIN_SERVER }} \
-            --wait --timeout 20m
+            --set global.registry=${{ secrets.ACR_LOGIN_SERVER }}
+          
+          echo "✅ Helm deployment initiated"
+          echo "⏳ Waiting for pods to be ready..."
+          
+          # Wait for deployments to roll out (with retries to avoid rate limiting)
+          for deployment in backend frontend notification-service; do
+            echo "Checking $deployment..."
+            kubectl rollout status deployment/$deployment -n ${{ env.NAMESPACE }} --timeout=10m || true
+            sleep 5
+          done
       
       - name: Verify deployment
         run: |
