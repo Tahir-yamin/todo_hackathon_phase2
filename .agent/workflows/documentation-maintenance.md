@@ -200,6 +200,180 @@ If it's a completely new topic:
 
 ---
 
+## Step 3.5: Extract Skills from Walkthrough (Post-Deployment)
+
+### When to Do This
+- After completing a major deployment/feature
+- After creating a walkthrough document
+- When multiple new techniques were learned
+- Before archiving a complex project phase
+
+### Purpose
+Extract individual, reusable skills from walkthrough documentation to create focused skill files that can be easily referenced and reused across projects.
+
+### How to Extract Skills
+
+**1. Review the Walkthrough**
+
+Read through your `walkthrough.md` or final documentation and identify:
+- [ ] New technologies/tools learned (e.g., AKS, Helm, Dapr)
+- [ ] Troubleshooting techniques that can be reused
+- [ ] Configuration patterns that solved problems
+- [ ] Optimization strategies that worked
+- [ ] Debugging approaches that were effective
+
+**2. Create Separate Skill Files**
+
+For each major skill area discovered, create a NEW standalone skill file:
+
+```bash
+# Examples from Phase 5:
+.claude/aks-troubleshooting-skills.md
+.claude/helm-configuration-skills.md  
+.claude/docker-optimization-skills.md
+.claude/kubernetes-resource-management-skills.md
+```
+
+**DO NOT** combine all skills into one file. Each topic gets its own file for:
+- ✅ Better discoverability
+- ✅ Easier maintenance
+- ✅ Clearer organization
+- ✅ Reusability across projects
+
+**3. Use Skill File Template**
+
+```markdown
+# [Topic] Skills
+
+**Purpose**: [One-line description of what these skills solve]  
+**Source**: Extracted from [project/phase name]  
+**Date**: [Month Year]
+
+---
+
+## Skill #1: [Specific Skill Name]
+
+### When to Use
+- [Scenario 1]
+- [Scenario 2]
+
+### The Problem
+[Brief description of what problem this solves]
+
+### The Solution
+
+[Step-by-step instructions or command sequence]
+
+```bash
+# Example commands
+command here
+```
+
+### Key Insights
+- ✅ [What worked]
+- ❌ [What didn't work]
+- 💡 [Important tip]
+
+**Related Skills**: [Links to other relevant skills]
+
+---
+
+## Skill #2: [Next Skill]
+
+[... repeat pattern ...]
+
+---
+
+## Quick Reference
+
+[Cheat sheet of commands/patterns from this file]
+
+---
+
+**Total Skills**: X  
+**Last Updated**: [Date]
+```
+
+**4. Populate Each Skill**
+
+Extract specific, actionable knowledge:
+
+- **Commands that worked**: Copy exact command sequences
+- **Configuration snippets**: Include actual YAML/JSON that solved issues  
+- **Troubleshooting steps**: Document the diagnostic process
+- **Error messages**: Include common errors and their fixes
+- **Best practices**: Capture lessons learned
+
+**5. Sync to Dev Knowledge Base**
+
+After creating skill files:
+
+```powershell
+// turbo
+# Step 1: Define paths
+$projectSkills = "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\.claude"
+$devKnowledgeBase = "d:\Dev-Knowledge-Base\.claude"  # Adjust path as needed
+
+# Step 2: Copy new skill files to knowledge base
+Copy-Item "$projectSkills\*.md" -Destination $devKnowledgeBase -Force
+
+# Step 3: Navigate to knowledge base
+cd "d:\Dev-Knowledge-Base"
+
+# Step 4: Commit to knowledge base repo
+git add .claude/*.md
+git commit -m "docs: add skills from [project name] Phase X"
+git push origin main
+```
+
+**6. Update Todo Repo**
+
+```powershell
+// turbo
+# Navigate back to todo repo
+cd "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
+
+# Commit the new skill files
+git add .claude/*.md
+git commit -m "docs: add [topic] skills from Phase X deployment"
+git push origin main
+```
+
+---
+
+### Example: Phase 5 Skill Extraction
+
+**From Walkthrough Identified**:
+1. AKS deployment troubleshooting (20 iterations)
+2. Helm resource optimization
+3. Docker build optimization for Prisma
+4. Kubernetes secret management
+
+**Created Files**:
+1. `.claude/aks-troubleshooting-skills.md` → 5 skills
+2. `.claude/helm-configuration-skills.md` → 4 skills
+3. `.claude/docker-prisma-skills.md` → 3 skills
+4. `.claude/kubernetes-secrets-skills.md` → 2 skills
+
+**Each file**: Self-contained, focused, immediately reusable
+
+---
+
+### Sync Checklist
+
+After creating skills from walkthrough:
+
+- [ ] Each major topic has its own skill file
+- [ ] No mega-files with unrelated skills
+- [ ] All skill files updated in project `.claude/` folder
+- [ ] Copied to local Dev Knowledge Base
+- [ ] Committed to Dev Knowledge Base repo
+- [ ] Committed to Todo project repo
+- [ ] Updated `.claude/skills.md` index with new files
+- [ ] Cross-referenced related skills
+
+---
+
 ## Step 4: Update Design System
 
 ### When to Update
