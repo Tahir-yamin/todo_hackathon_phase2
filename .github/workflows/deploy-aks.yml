@@ -227,7 +227,13 @@ jobs:
             echo "🧹 Deleting existing namespace..."
             kubectl delete namespace ${{ env.NAMESPACE }} --timeout=60s || true
             echo "⏳ Waiting for namespace deletion..."
-            kubectl wait --for=delete namespace/${{ env.NAMESPACE }} --timeout=120s || true
+            sleep 10
+            # Wait until namespace is completely gone
+            while kubectl get namespace ${{ env.NAMESPACE }} 2>/dev/null; do
+              echo "Still deleting... waiting 5s"
+              sleep 5
+            done
+            echo "✅ Namespace deleted successfully"
           fi
       
       - name: Deploy with Helm
