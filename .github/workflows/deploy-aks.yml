@@ -238,7 +238,7 @@ jobs:
             --set notificationService.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/notification-service \
             --set notificationService.image.tag=${{ needs.build.outputs.notification_tag }} \
             --set global.registry=${{ secrets.ACR_LOGIN_SERVER }} \
-            --wait --timeout 10m
+            --wait --timeout 20m
       
       - name: Verify deployment
         run: |
