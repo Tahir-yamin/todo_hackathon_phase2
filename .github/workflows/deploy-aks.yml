@@ -221,6 +221,15 @@ jobs:
         with:
           version: 'v3.14.0'
       
+      - name: Clean up existing namespace (if any)
+        run: |
+          if kubectl get namespace ${{ env.NAMESPACE }} 2>/dev/null; then
+            echo "🧹 Deleting existing namespace..."
+            kubectl delete namespace ${{ env.NAMESPACE }} --timeout=60s || true
+            echo "⏳ Waiting for namespace deletion..."
+            kubectl wait --for=delete namespace/${{ env.NAMESPACE }} --timeout=120s || true
+          fi
+      
       - name: Deploy with Helm
         run: |
           helm upgrade --install todo-chatbot ./phase4/helm/todo-chatbot \
