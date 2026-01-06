@@ -227,6 +227,20 @@ jobs:
           kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
           echo "✅ Namespace ready"
       
+      - name: Create ACR image pull secret
+        run: |
+          # Delete old secret if exists
+          kubectl delete secret acr-secret -n ${{ env.NAMESPACE }} --ignore-not-found=true
+          
+          # Create new secret for ACR authentication
+          kubectl create secret docker-registry acr-secret \
+            --namespace=${{ env.NAMESPACE }} \
+            --docker-server=${{ secrets.ACR_LOGIN_SERVER }} \
+            --docker-username=${{ secrets.ACR_USERNAME }} \
+            --docker-password=${{ secrets.ACR_PASSWORD }}
+          
+          echo "✅ ACR secret created"
+      
       - name: Deploy with Helm
         run: |
           helm upgrade --install todo-chatbot ./phase4/helm/todo-chatbot \

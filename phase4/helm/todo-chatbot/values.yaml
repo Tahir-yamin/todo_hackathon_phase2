@@ -16,6 +16,10 @@ dapr:
 # Image pull policy for all containers
 imagePullPolicy: IfNotPresent
 
+# Image pull secrets for Azure Container Registry
+imagePullSecrets:
+  - name: acr-secret
+
 # Resource defaults (can be overridden per service)
 resources:
   requests:
