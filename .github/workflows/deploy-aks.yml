@@ -276,8 +276,10 @@ jobs:
       - name: Get application endpoints
         run: |
           echo "📍 Application endpoints:"
-          kubectl get ingress -n ${{ env.NAMESPACE }}
-          kubectl get service frontend -n ${{ env.NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+          kubectl get ingress -n ${{ env.NAMESPACE }} || echo "No ingress configured"
+          echo ""
+          echo "Frontend service (NodePort):"
+          kubectl get service frontend-service -n ${{ env.NAMESPACE }} || true
   
   # Job 4: Post-Deployment Verification
   verify:
