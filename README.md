@@ -2,7 +2,7 @@
 
 **Production-Ready Cloud-Native Todo Application with AI Chatbot & Kubernetes Deployment**
 
-[![Deployment](https://img.shields.io/badge/Deployed-Vercel-black)](https://phase2-six.vercel.app)
+[![Deployment](https://img.shields.io/badge/Deployed-Vercel-black)]([https://phase2-six.vercel.app](https://frontend-seven-tawny-19.vercel.app/))
 [![Phase](https://img.shields.io/badge/Phase-IV%20Complete-brightgreen)]()
 [![Kubernetes](https://img.shields.io/badge/K8s-Ready-blue)]()
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
@@ -11,7 +11,7 @@
 
 ## 📋 Quick Links
 
-- **Live Demo**: [https://phase2-six.vercel.app](https://phase2-six.vercel.app)
+- **Live Demo**: [https://phase2-six.vercel.app](https://frontend-seven-tawny-19.vercel.app)
 - **Phase IV Deployment Guide**: [`phase4/MANUAL-OPERATIONS-GUIDE.md`](./phase4/MANUAL-OPERATIONS-GUIDE.md)
 - **Spec-Driven Process**: [`CLAUDE.md`](./CLAUDE.md)
 - **Project Constitution**: [`CONSTITUTION.md`](./CONSTITUTION.md)
