@@ -571,33 +571,6 @@ Update `.claude/skills.md`:
 ## Step 9: Validation
 
 **Check your updates**:
-
-- [ ] File is in correct location
-- [ ] Uses consistent formatting
-- [ ] Added to appropriate index
-- [ ] Cross-references are correct
-- [ ] Markdown renders properly
-- [ ] Code examples are tested
-- [ ] No typos in commands
-
----
-
-## Step 10: Commit Changes
-
-// turbo
-```bash
-git add .
-git commit -m "docs: [what you updated]"
-
-# Examples:
-# docs: add API integration workflow
-# docs: add Redis caching skill to database-skills
-# docs: update Button component in design system
-# docs: document successful Docker optimization prompt
-```
-
----
-
 ## 📝 Quick Reference
 
 ### File Locations
