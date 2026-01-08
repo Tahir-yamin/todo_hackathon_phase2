@@ -312,30 +312,47 @@ After creating skill files:
 // turbo
 # Step 1: Define paths
 $projectSkills = "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\.claude"
-$devKnowledgeBase = "d:\Dev-Knowledge-Base\.claude"  # Adjust path as needed
+$devKB = "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1\my-dev-knowledge-base"
 
-# Step 2: Copy new skill files to knowledge base
-Copy-Item "$projectSkills\*.md" -Destination $devKnowledgeBase -Force
+# Step 2: Ensure Dev KB directories exist
+if (-not (Test-Path "$devKB\.claude")) {
+    New-Item -ItemType Directory -Path "$devKB\.claude" -Force
+    Write-Host "✅ Created Dev KB .claude directory" -ForegroundColor Green
+}
 
-# Step 3: Navigate to knowledge base
-cd "d:\Dev-Knowledge-Base"
+# Step 3: Copy all skill files to Dev Knowledge Base
+Copy-Item "$projectSkills\*.md" -Destination "$devKB\.claude\" -Force
+Write-Host "✅ Synced $($(Get-ChildItem "$devKB\.claude\*.md").Count) skill files to Dev KB" -ForegroundColor Cyan
 
-# Step 4: Commit to knowledge base repo
+# Step 4: Navigate to Dev Knowledge Base
+cd "$devKB"
+
+# Step 5: Initialize git if needed
+if (-not (Test-Path ".git")) {
+    git init
+    Write-Host "✅ Initialized Git repository in Dev KB" -ForegroundColor Green
+}
+
+# Step 6: Commit to Dev Knowledge Base
 git add .claude/*.md
-git commit -m "docs: add skills from [project name] Phase X"
-git push origin main
+git commit -m "docs: sync skills from [project/phase name] - $(Get-Date -Format 'yyyy-MM-dd')"
+Write-Host "✅ Committed to Dev KB (commit: $(git log -1 --format='%h'))" -ForegroundColor Green
+
+# Step 7: Return to project root
+cd "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
 ```
 
 **6. Update Todo Repo**
 
 ```powershell
 // turbo
-# Navigate back to todo repo
+# Navigate to project root
 cd "d:\Hackathon phase 1 TODO App\todo_hackathon_phase1"
 
-# Commit the new skill files
+# Commit the new skill files to main repo
 git add .claude/*.md
-git commit -m "docs: add [topic] skills from Phase X deployment"
+git add my-dev-knowledge-base/.claude/*.md
+git commit -m "docs: add [topic] skills from Phase X + sync to Dev KB"
 git push origin main
 ```
 
