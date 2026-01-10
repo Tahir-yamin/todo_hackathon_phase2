@@ -4,13 +4,13 @@ description: Index of all available workflows for troubleshooting and developmen
 
 # Workflows Index
 
-**Total Workflows**: 24  
+**Total Workflows**: 25  
 **Location**: `.agent/workflows/`  
-**Last Updated**: January 5, 2026
+**Last Updated**: January 10, 2026
 
 ---
 
-## 🚨 Troubleshooting Workflows (8)
+## 🚨 Troubleshooting Workflows (9)
 
 ### 1. [Build Failures](./build-failures.md)
 **Use when**: npm build, Docker build, TypeScript errors, dependency issues  
@@ -40,17 +40,22 @@ description: Index of all available workflows for troubleshooting and developmen
 **Use when**: Moving to production, deploying to cloud, SSL issues  
 **Includes**: Pre-deployment checklist, migration process, rollback plan
 
-### 8. [Security Audit](./security-audit.md) 🔐
+### 8. [Antigravity Browser Agent Issues](./antigravity-browser-agent-issues.md) 🌐
+**Use when**: Browser Agent unavailable, Chrome DevTools Protocol errors  
+**Fixes**: Port 9222 conflicts, wsarecv errors, gcloud authentication, firewall blocking  
+**Includes**: Step-by-step fix, prevention script, WSL2 workarounds
+
+### 9. [Security Audit](./security-audit.md) 🔐
 **Use when**: Before deployment, before committing code, regular audits  
 **Fixes**: API key exposure, secrets in ConfigMap, Git history cleanup  
 **Includes**: Credential scanning, sealed-secrets, pre-commit hooks
 
-### 9. [Kubernetes Deployment Testing](./kubernetes-deployment-testing.md) ☸️
+### 10. [Kubernetes Deployment Testing](./kubernetes-deployment-testing.md) ☸️
 **Use when**: Phase 4 Kubernetes deployment issues, Helm chart problems  
 **Fixes**: Pod failures, service connectivity, ConfigMap issues, SSL errors  
 **Includes**: Comprehensive Phase 4 deployment troubleshooting, real-world issues
 
-### 10. [Phase V Troubleshooting](./phase5-troubleshooting.md) 🚀
+### 11. [Phase V Troubleshooting](./phase5-troubleshooting.md) 🚀
 **Use when**: Phase 5 Kafka, Dapr, or AKS cloud deployment issues  
 **Fixes**: Dapr sidecar injection, Kafka/Strimzi issues, ACR pull errors  
 **Includes**: Dapr debugging, Kafka topic creation, GitHub Actions CI/CD
@@ -144,6 +149,7 @@ Browse this file to find the right workflow for your problem.
 | CORS policy error | cors-errors |
 | App is slow | performance-problems |
 | Deploying to production | deployment-issues |
+| **Browser Agent unavailable** | **antigravity-browser-agent-issues** |
 | Starting fresh project | starting-new-project |
 | **Kubernetes pods failing** | **kubernetes-deployment-testing** |
 | **Need full QA test** | **complete-application-qa** |
