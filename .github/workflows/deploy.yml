@@ -1,64 +1,81 @@
-name: Deploy to GitHub Pages (DISABLED - Using Vercel)
+name: Build and Deploy to AKS
 
 on:
-  # Disabled automatic deployment - using Vercel instead
-  # push:
-  #   branches: [ main ]
-  workflow_dispatch:  # Can still run manually if needed
+  push:
+    branches: [main, master]
+  workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+env:
+  ACR_NAME: tahirtodo123
+  RESOURCE_GROUP: phase4-hackathon
+  AKS_CLUSTER: phase4AKSCluster
+  FRONTEND_IMAGE: todo-frontend
+  BACKEND_IMAGE: todo-backend
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Azure Login
+        uses: azure/login@v1
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: phase2/frontend/package-lock.json
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Install dependencies
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ env.ACR_NAME }}
+      
+      - name: Build and push frontend
         run: |
           cd phase2/frontend
-          npm ci
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=http://20.246.145.132:8000 \
+            --build-arg NEXT_PUBLIC_APP_URL=http://20.246.145.132:3000 \
+            -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:latest \
+            .
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:latest
       
-      - name: Build Next.js app
-        env:
-          NEXT_PUBLIC_APP_URL: https://tahir-yamin.github.io/todo_hackathon_phase2
-          NEXT_PUBLIC_API_URL: ${{ secrets.BACKEND_API_URL }}
+      - name: Build and push backend
         run: |
-          cd phase2/frontend
-          npm run build
+          cd phase2/backend
+          docker build \
+            -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:latest \
+            .
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:latest
       
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials --resource-group ${{ env.RESOURCE_GROUP }} --name ${{ env.AKS_CLUSTER }} --overwrite-existing
       
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: phase2/frontend/out
-  
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to AKS
+        run: |
+          # Update frontend deployment
+          kubectl set image deployment/todo-frontend \
+            frontend=${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            -n default
+          
+          # Update backend deployment
+          kubectl set image deployment/todo-backend \
+            backend=${{env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -n default
+          
+          # Wait for rollouts to complete
+          kubectl rollout status deployment/todo-frontend -n default --timeout=5m
+          kubectl rollout status deployment/todo-backend -n default --timeout=5m
+      
+      - name: Verify deployment
+        run: |
+          echo "=== Frontend Pods ==="
+          kubectl get pods -l app=todo-frontend -n default
+          echo "=== Backend Pods ==="
+          kubectl get pods -l app=todo-backend -n default
+          echo "=== Services ==="
+          kubectl get svc -n default

@@ -144,7 +144,7 @@ function DashboardContent() {
     }
 
     return (
-        <div className="flex flex-col md:grid md:grid-cols-[auto_1fr] h-screen bg-slate-950 relative overflow-hidden">
+        <div className="flex h-screen bg-slate-950 relative overflow-hidden">
             {/* Animated Background Blobs - matching landing page */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] animate-blob" />
@@ -152,11 +152,11 @@ function DashboardContent() {
                 <div className="absolute bottom-[-10%] left-[30%] w-[550px] h-[550px] bg-blue-500/10 rounded-full blur-[120px] animate-blob animation-delay-4000" />
             </div>
 
-            <div className="hidden md:block relative z-10">
-                <Sidebar onTaskCreated={fetchTasks} />
-            </div>
+            {/* Sidebar - Fixed width, flex-shrink-0 */}
+            <Sidebar onTaskCreated={fetchTasks} />
 
-            <main className="flex flex-col h-full overflow-hidden relative z-10">
+            {/* Main Content - flex-1 to take remaining space */}
+            <main className="flex flex-col flex-1 h-full overflow-hidden relative z-10">
                 <nav className="px-6 h-16 flex justify-between items-center bg-white/5 backdrop-blur-xl border-b border-white/10 flex-shrink-0">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.3)] border border-white/10">
@@ -217,7 +217,7 @@ function DashboardContent() {
 
                 <FilterBar onFilterChange={handleFilterChange} />
 
-                <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {view === 'list' ? (
                         <TaskList tasks={filteredTasks} onTaskUpdated={fetchTasks} />
                     ) : (

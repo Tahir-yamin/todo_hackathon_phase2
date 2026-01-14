@@ -96,11 +96,44 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
                     }
                 }, 500);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Chat error:', error);
+
+            // Try to parse detailed error from response
+            let errorContent = '❌ Sorry, I encountered an error.';
+
+            if (error?.message?.includes('500')) {
+                // Try to extract the detail from the error response body
+                try {
+                    const errorMatch = error.message.match(/"detail":"(.+?)"/); if (errorMatch) {
+                        const detail = errorMatch[1].replace(/\\'/g, "'");
+
+                        // Check if it's a token/credit error
+                        if (detail.includes('402') || detail.includes('max_tokens') || detail.includes('credits')) {
+                            // Extract key information
+                            const tokensMatch = detail.match(/(\d+)\s+tokens/);
+                            const affordMatch = detail.match(/afford\s+(\d+)/);
+
+                            errorContent = `### ⚠️ API Credit Limit Reached\n\n` +
+                                `| Issue | Details |\n` +
+                                `|-------|---------|\n` +
+                                `| **Status** | 402 Payment Required |\n` +
+                                `| **Requested** | ${tokensMatch ? tokensMatch[1] : 'Unknown'} tokens |\n` +
+                                `| **Available** | ${affordMatch ? affordMatch[1] : 'Limited'} tokens |\n` +
+                                `| **Solution** | Request is processing but response limited. Task should still be created. |\n\n` +
+                                `💡 **Note**: Check [OpenRouter Credits](https://openrouter.ai/settings/credits) to increase limits.`;
+                        } else {
+                            errorContent = `### ⚠️ Server Error\n\n**Details**: ${detail.substring(0, 200)}...\n\nPlease try again or contact support.`;
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing error details:', parseError);
+                }
+            }
+
             setMessages(prev => [...prev, {
                 role: 'model',
-                content: '❌ Sorry, I encountered an error. Please try again.'
+                content: errorContent
             }]);
         } finally {
             setLoading(false);
@@ -120,7 +153,7 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
         <>
             {/* Chat Widget Container */}
             {isOpen && (
-                <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-[#0a0f1a] border border-cyan-500/30 rounded-lg shadow-2xl flex flex-col z-[9999]" style={{ backgroundColor: '#0a0f1a' }}>
+                <div className="fixed bottom-20 right-4 w-80 h-[500px] bg-[#0a0f1a] border border-cyan-500/30 rounded-lg shadow-2xl flex flex-col z-[9999]" style={{ backgroundColor: '#0a0f1a' }}>
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-border-subtle rounded-t-lg">
                         <div className="flex items-center gap-2">

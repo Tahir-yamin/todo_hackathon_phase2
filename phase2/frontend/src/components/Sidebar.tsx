@@ -13,8 +13,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onTaskCreated }) => {
 
     return (
         <aside
-            className={`${isOpen ? 'w-[320px]' : 'w-16'
-                } bg-white/5 dark:bg-white/5 bg-slate-100/80 backdrop-blur-xl border-r dark:border-white/10 border-slate-300 relative transition-all duration-300 flex flex-col overflow-hidden z-50`}
+            className={`${isOpen ? 'w-[240px] sm:w-[260px]' : 'w-16'}
+                } flex-shrink-0 bg-white/5 dark:bg-white/5 bg-slate-100/80 backdrop-blur-xl border-r dark:border-white/10 border-slate-300 relative transition-all duration-300 flex flex-col overflow-y-auto z-50`}
         >
             {/* Toggle Button */}
             <div className="absolute top-4 right-4 z-20">
@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onTaskCreated }) => {
                     </div>
 
                     {/* Task Form */}
-                    <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-4 sm:p-6 flex-1 overflow-x-hidden custom-scrollbar">
                         <TaskForm onTaskCreated={onTaskCreated} inSidebar={true} />
                     </div>
 

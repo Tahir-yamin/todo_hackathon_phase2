@@ -1,41 +1,29 @@
-# Frontend Dockerfile - Next.js Standalone Mode
-FROM node:20-alpine AS builder
-
-# Install OpenSSL for Prisma
-RUN apk add --no-cache openssl
-
+FROM node:20-slim AS builder
+# Install dependencies for Prisma/Next.js
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
-# Copy package files
+# Copy dependency definitions
 COPY package*.json ./
-
-# Copy prisma schema BEFORE npm ci (needed for postinstall script)
 COPY prisma ./prisma/
 
-# Install dependencies (postinstall will run prisma generate)
+# Install dependencies inside the container
 RUN npm ci
 
-# Copy source code
+# Copy the rest of the source code
 COPY . .
 
-# Build the app with standalone output
+# Build Arguments
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_TELEMETRY_DISABLED=1
+
 RUN npm run build
 
-# Production stage - Standalone mode doesn't need npm!
-FROM node:20-alpine AS production
-
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Copy the standalone output (includes all dependencies)
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Expose port
+# Expose the port Next.js runs on
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the production server
+CMD ["npm", "start"]

@@ -6,15 +6,25 @@ Uses OpenRouter API (OpenAI-compatible) with MCP tools for function calling.
 
 import os
 import json
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlmodel import Session, select
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+import sys
+import asyncio
+import logging
+
+from fastapi import APIRouter, HTTPException, Request, Header, Depends
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from openai import OpenAI
+from sqlmodel import Session, select
 
 from db import get_session
 from models import Conversation, Message
 from mcp_server import mcp
+
+# Configure detailed logging
+logger = logging.getLogger("uvicorn.error")
+logger.setLevel(logging.DEBUG)
 
 router = APIRouter()
 
@@ -41,6 +51,7 @@ class ChatResponse(BaseModel):
 async def chat_with_ai(
     user_id: str,  # Path parameter for backward compatibility
     request: ChatRequest,
+    request_obj: Request, # Added for logging context
     db: Session = Depends(get_session),
     x_user_id: Optional[str] = Header(None)
 ):
@@ -51,7 +62,7 @@ async def chat_with_ai(
         # Use header user_id if provided (real user), otherwise use path parameter (legacy)
         effective_user_id = x_user_id if x_user_id else user_id
         
-        print(f"\n💬 Chat request from {effective_user_id}: {request.message}")
+        logger.info(f"💬 Chat request from {effective_user_id} (IP: {request_obj.client.host}): {request.message}")
         
         # Build messages with history
         messages = [
@@ -93,33 +104,55 @@ async def chat_with_ai(
         # Add current user message
         messages.append({"role": "user", "content": request.message})
         
-        print(f"🔧 Calling OpenRouter with {len(messages)} messages for user: {effective_user_id}...")
+        logger.info(f"🔧 Calling OpenRouter with {len(messages)} messages for user: {effective_user_id}...")
         
         # Call OpenRouter with function calling
-        response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",  # Cost-effective model
-            messages=messages,
-            tools=mcp.get_tools_schema(),
-            tool_choice="auto",
-            temperature=0.7
-        )
+        logger.info(f"🚀 Calling OpenRouter with model: mistralai/devstral-2512:free")
+        try:
+            response = client.chat.completions.create(
+                model="mistralai/devstral-2512:free",  # Free Mistral model for coding
+                messages=messages,
+                tools=mcp.get_tools_schema(),
+                tool_choice="auto",
+                temperature=0.7,
+                max_tokens=2000  # Reduced to fit free tier limits
+            )
+        except Exception as api_error:
+            logger.error(f"❌ OPENROUTER API ERROR: {type(api_error).__name__}: {str(api_error)}")
+            logger.error(f"   Error details: {repr(api_error)}")
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": "OpenRouter API call failed",
+                    "error_type": type(api_error).__name__,
+                    "message": str(api_error),
+                    "model": "mistralai/devstral-2512:free"
+                }
+            )
         
-        response_message = response.choices[0].message
+        # Get the assistant's response
+        assistant_message = response.choices[0].message
+        messages.append({
+            "role": "assistant",
+            "content": assistant_message.content or "",
+            "tool_calls": assistant_message.tool_calls
+        })
+        
         tool_call_count = 0
         
         # Check if tool calls are needed
-        if response_message.tool_calls:
-            print(f"🔧 AI requested {len(response_message.tool_calls)} tool calls")
-            tool_call_count = len(response_message.tool_calls)
+        if assistant_message.tool_calls:
+            logger.info(f"🔧 AI requested {len(assistant_message.tool_calls)} tool calls")
+            tool_call_count = len(assistant_message.tool_calls)
             
             # Execute all tool calls
             tool_results = []
-            for tool_call in response_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
                 function_name = tool_call.function.name
                 function_args = json.loads(tool_call.function.arguments)
                 
-                print(f"  📌 Tool: {function_name}")
-                print(f"  📊 Args: {function_args}")
+                logger.debug(f"  📌 Tool: {function_name}")
+                logger.debug(f"  📊 Args: {function_args}")
                 
                 # Execute via MCP server with the correct user ID
                 result = await mcp.execute_tool(
@@ -128,14 +161,14 @@ async def chat_with_ai(
                     effective_user_id  # Use the header-based user ID
                 )
                 
-                print(f"  ✅ Result: {result}")
+                logger.debug(f"  ✅ Result: {result}")
                 tool_results.append(result)
             
             # Add tool results back to conversation
-            messages.append(response_message.model_dump())
+            # messages.append(response_message.model_dump()) # This was already added above as assistant_message
             
             # Add tool responses
-            for idx, (tool_call, result) in enumerate(zip(response_message.tool_calls, tool_results)):
+            for idx, (tool_call, result) in enumerate(zip(assistant_message.tool_calls, tool_results)):
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call.id,
@@ -143,17 +176,29 @@ async def chat_with_ai(
                 })
             
             # Get final response from AI
-            print(f"🔄 Getting final response from AI...")
-            second_response = client.chat.completions.create(
-                model=os.getenv("AI_MODEL", "deepseek/deepseek-chat"),
-                messages=messages,
-                temperature=0.7
-            )
+            logger.info(f"🔄 Getting final response from AI after tool execution...")
+            try:
+                second_response = client.chat.completions.create(
+                    model="mistralai/devstral-2512:free",  # Free Mistral model
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=2000  # Reduced to fit free tier limits
+                )
+            except Exception as api_error:
+                logger.error(f"❌ OPENROUTER SECOND CALL ERROR: {type(api_error).__name__}: {str(api_error)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail={
+                        "error": "OpenRouter second API call failed",
+                        "error_type": type(api_error).__name__,
+                        "message": str(api_error)
+                    }
+                )
             
             final_message = second_response.choices[0].message.content
             # Fallback if AI returns empty response
             if not final_message or final_message.strip() == "":
-                print(f"⚠️ AI returned empty response after tool execution, using fallback")
+                logger.warning(f"⚠️ AI returned empty response after tool execution, using fallback")
                 final_message = "Action completed successfully."
         else:
             # No tool calls, use direct response
