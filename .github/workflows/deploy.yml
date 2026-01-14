@@ -51,7 +51,7 @@ jobs:
     - name: Deploy to AKS
       run: |
         kubectl set image deployment/${{ env.FRONTEND_DEPLOYMENT }} frontend=${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -n ${{ env.NAMESPACE }}
-        kubectl set image deployment/${{ env.BACKEND_DEPLOYMENT }} backend=${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }} -n ${{ env.NAMESPACE }}
+        kubectl set image deployment/${{ env.BACKEND_DEPLOYMENT }} notification-service=${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }} -n ${{ env.NAMESPACE }}
 
     - name: Verify deployment
       run: |
