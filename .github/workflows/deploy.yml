@@ -11,6 +11,9 @@ env:
   AKS_CLUSTER: todo-aks-cluster
   FRONTEND_IMAGE: todo-frontend
   BACKEND_IMAGE: todo-backend
+  NAMESPACE: todo-chatbot
+  FRONTEND_DEPLOYMENT: todo-chatbot-frontend
+  BACKEND_DEPLOYMENT: todo-chatbot-notification
 
 jobs:
   build-and-deploy:
@@ -47,10 +50,11 @@ jobs:
 
     - name: Deploy to AKS
       run: |
-        kubectl set image deployment/todo-frontend frontend=${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-        kubectl set image deployment/todo-backend backend=${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+        kubectl set image deployment/${{ env.FRONTEND_DEPLOYMENT }} frontend=${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} -n ${{ env.NAMESPACE }}
+        kubectl set image deployment/${{ env.BACKEND_DEPLOYMENT }} backend=${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_IMAGE }}:${{ github.sha }} -n ${{ env.NAMESPACE }}
 
     - name: Verify deployment
       run: |
-        kubectl rollout status deployment/todo-frontend
-        kubectl rollout status deployment/todo-backend
+        kubectl rollout status deployment/${{ env.FRONTEND_DEPLOYMENT }} -n ${{ env.NAMESPACE }}
+        kubectl rollout status deployment/${{ env.BACKEND_DEPLOYMENT }} -n ${{ env.NAMESPACE }}
+        kubectl get pods -n ${{ env.NAMESPACE }}
