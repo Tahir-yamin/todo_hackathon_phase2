@@ -1,6 +1,7 @@
 import { authClient } from './auth-client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002';
+// Use relative path for API calls - Next.js rewrites will proxy to backend
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Get auth headers with real user ID from session
 const getAuthHeaders = async () => {

@@ -3,151 +3,152 @@
 import { useState, useRef, useEffect } from "react";
 
 interface Message {
-    id: string;
-    role: "user" | "assistant";
-    content: string;
+  id: string;
+  role: "user" | "assistant";
+  content: string;
 }
 
 export default function AIChat() {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [input, setInput] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [conversationId, setConversationId] = useState<number | null>(null);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<number | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    setMessages(prev => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    try {
+      // Use relative path - Next.js rewrites will proxy to backend
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+      const response = await fetch(`${apiUrl}/api/hackathon-demo-user/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          message: input,
+          conversation_history: messages.slice(-10).map(m => ({
+            role: m.role,
+            content: m.content
+          }))
+        })
+      });
 
-        if (!input.trim() || isLoading) return;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const userMessage: Message = {
-            id: Date.now().toString(),
-            role: "user",
-            content: input
-        };
+      const data = await response.json();
 
-        setMessages(prev => [...prev, userMessage]);
-        setInput("");
-        setIsLoading(true);
+      // Update conversation ID if new
+      if (!conversationId && data.conversation_id) {
+        setConversationId(data.conversation_id);
+      }
 
-        try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8002";
-            const response = await fetch(`${apiUrl}/api/hackathon-demo-user/chat`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    conversation_id: conversationId,
-                    message: input,
-                    conversation_history: messages.slice(-10).map(m => ({
-                        role: m.role,
-                        content: m.content
-                    }))
-                })
-            });
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data.response
+      };
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+      setMessages(prev => [...prev, assistantMessage]);
 
-            const data = await response.json();
+    } catch (error) {
+      console.error("Chat error:", error);
 
-            // Update conversation ID if new
-            if (!conversationId && data.conversation_id) {
-                setConversationId(data.conversation_id);
-            }
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again."
+      };
 
-            const assistantMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                role: "assistant",
-                content: data.response
-            };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            setMessages(prev => [...prev, assistantMessage]);
+  return (
+    <div className="ai-chat-container">
+      <div className="chat-header">
+        <h3>🤖 AI Task Assistant</h3>
+        <p>Ask me to manage your tasks with natural language</p>
+      </div>
 
-        } catch (error) {
-            console.error("Chat error:", error);
+      <div className="chat-messages">
+        {messages.length === 0 && (
+          <div className="empty-state">
+            <p>👋 Hi! I can help you manage your tasks.</p>
+            <p className="suggestions">Try saying:</p>
+            <ul>
+              <li>&quot;Add a task to call mom&quot;</li>
+              <li>&quot;Show me all my tasks&quot;</li>
+              <li>&quot;Mark my grocery task as complete&quot;</li>
+            </ul>
+          </div>
+        )}
 
-            const errorMessage: Message = {
-                id: (Date.now() + 1).toString(),
-                role: "assistant",
-                content: "Sorry, I encountered an error. Please try again."
-            };
-
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return (
-        <div className="ai-chat-container">
-            <div className="chat-header">
-                <h3>🤖 AI Task Assistant</h3>
-                <p>Ask me to manage your tasks with natural language</p>
+        {messages.map((m) => (
+          <div key={m.id} className={`message ${m.role}`}>
+            <div className="message-avatar">
+              {m.role === "user" ? "👤" : "🤖"}
             </div>
-
-            <div className="chat-messages">
-                {messages.length === 0 && (
-                    <div className="empty-state">
-                        <p>👋 Hi! I can help you manage your tasks.</p>
-                        <p className="suggestions">Try saying:</p>
-                        <ul>
-                            <li>&quot;Add a task to call mom&quot;</li>
-                            <li>&quot;Show me all my tasks&quot;</li>
-                            <li>&quot;Mark my grocery task as complete&quot;</li>
-                        </ul>
-                    </div>
-                )}
-
-                {messages.map((m) => (
-                    <div key={m.id} className={`message ${m.role}`}>
-                        <div className="message-avatar">
-                            {m.role === "user" ? "👤" : "🤖"}
-                        </div>
-                        <div className="message-content">
-                            <strong>{m.role === "user" ? "You" : "AI Assistant"}</strong>
-                            <p>{m.content}</p>
-                        </div>
-                    </div>
-                ))}
-
-                {isLoading && (
-                    <div className="message assistant">
-                        <div className="message-avatar">🤖</div>
-                        <div className="message-content">
-                            <div className="typing-indicator">
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} />
+            <div className="message-content">
+              <strong>{m.role === "user" ? "You" : "AI Assistant"}</strong>
+              <p>{m.content}</p>
             </div>
+          </div>
+        ))}
 
-            <form onSubmit={handleSubmit} className="chat-input-form">
-                <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type a message... (e.g., 'Add a task to buy groceries')"
-                    disabled={isLoading}
-                />
-                <button type="submit" disabled={isLoading || !input.trim()}>
-                    {isLoading ? "..." : "Send"}
-                </button>
-            </form>
+        {isLoading && (
+          <div className="message assistant">
+            <div className="message-avatar">🤖</div>
+            <div className="message-content">
+              <div className="typing-indicator">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        )}
 
-            <style jsx>{`
+        <div ref={messagesEndRef} />
+      </div>
+
+      <form onSubmit={handleSubmit} className="chat-input-form">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message... (e.g., 'Add a task to buy groceries')"
+          disabled={isLoading}
+        />
+        <button type="submit" disabled={isLoading || !input.trim()}>
+          {isLoading ? "..." : "Send"}
+        </button>
+      </form>
+
+      <style jsx>{`
         .ai-chat-container {
           display: flex;
           flex-direction: column;
@@ -371,6 +372,6 @@ export default function AIChat() {
           background: #94a3b8;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 }
