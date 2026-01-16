@@ -35,12 +35,9 @@ class TaskBase(SQLModel):
     category: Optional[str] = Field(default="Personal")
     tags: Optional[str] = Field(default="")  # Comma-separated tags
     
-    # Phase 5: Recurrence fields
-    recurrence_type: Optional[str] = Field(default=None)  # NONE, DAILY, WEEKLY, MONTHLY, YEARLY
-    recurrence_details: Optional[str] = Field(default=None)  # JSON string for complex rules
-    
-    # Phase 5: Reminder field
-    remind_at: Optional[datetime] = Field(default=None)  # When to send reminder
+    # Phase 5: Recurrence fields (matching Prisma schema)
+    recurrence: str = Field(default="NONE")  # NONE, DAILY, WEEKLY, MONTHLY, YEARLY
+    next_occurrence: Optional[datetime] = Field(default=None)  # Next scheduled occurrence
 
 class Task(TaskBase, table=True):
     __tablename__ = "Task"
@@ -49,10 +46,6 @@ class Task(TaskBase, table=True):
     completed_at: Optional[datetime] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    
-    # Phase 5: Next occurrence for recurring tasks
-    next_occurrence_at: Optional[datetime] = Field(default=None)
-    last_triggered_at: Optional[datetime] = Field(default=None)
 
 class TaskCreate(TaskBase):
     pass
@@ -66,17 +59,16 @@ class TaskUpdate(SQLModel):
     category: Optional[str] = None
     tags: Optional[str] = None
     
-    # Phase 5: Recurrence updates
-    recurrence_type: Optional[str] = None
-    recurrence_details: Optional[str] = None
-    remind_at: Optional[datetime] = None
+    # Phase 5: Recurrence updates (matching Prisma)
+    recurrence: Optional[str] = None
+    next_occurrence: Optional[datetime] = None
 
 class TaskPublic(TaskBase):
     id: str
     user_id: str
     created_at: datetime
     updated_at: datetime
-    next_occurrence_at: Optional[datetime] = None
+    next_occurrence: Optional[datetime] = None
     completed_at: Optional[datetime] = None
 
 # --- Task Filter Model (Phase 5) ---

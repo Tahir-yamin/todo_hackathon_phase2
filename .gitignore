@@ -56,3 +56,22 @@ claude-subagents/
 dapr-quickstarts/
 claude-cookbooks/
 my-dev-knowledge-base/
+
+# Phase 5 temporary files
+*_extracted/
+*.zip
+*-backup.yaml
+*-temp.*
+phase2/frontend/CORS_FIX*.md
+phase2/frontend/*INSTRUCTIONS.txt
+phase2/frontend/ROOT_CAUSE*.txt
+phase4/scripts/fix-frontend*.ps1
+FINAL_FIX_COMMANDS.ps1
+REAL_FIX_CLEAR_CACHE.ps1
+backend-full-logs.txt
+openrouter-secret.yaml
+placement.zip
+scheduler.zip
+daprd.zip
+data/
+81

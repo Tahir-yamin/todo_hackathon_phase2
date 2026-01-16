@@ -81,6 +81,20 @@ model Verification {
 // TODO APP MODELS
 // ========================================
 
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum Recurrence {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
 model Task {
   id          String    @id @default(cuid())
   title       String
@@ -89,9 +103,11 @@ model Task {
   dueDate     DateTime? @map("due_date")
   status      String    @default("todo")
   category    String?   @default("Personal")
-  tags        String?   @default("")
-  completedAt DateTime? @map("completed_at")
-  userId      String?   @map("user_id")
+  tags        String?      @default("")
+  recurrence  Recurrence   @default(NONE)
+  nextOccurrence DateTime? @map("next_occurrence")
+  completedAt DateTime?    @map("completed_at")
+  userId      String?      @map("user_id")
   userEmail   String?   @map("user_email")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")

@@ -7,6 +7,8 @@ export interface Task {
   status: 'todo' | 'in_progress' | 'completed';
   category?: string | null;
   tags?: string | null;
+  recurrence?: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';  // Phase 5
+  next_occurrence?: string | null;  // Phase 5
   user_id: string;
   completed_at?: string | null;
   created_at: string;
@@ -21,4 +23,5 @@ export interface TaskFormData {
   status?: string;
   category?: string;
   tags?: string;
+  recurrence?: string;  // Phase 5
 }

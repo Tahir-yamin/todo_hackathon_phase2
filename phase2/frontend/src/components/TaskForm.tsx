@@ -18,6 +18,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false })
     due_date: '',
     category: 'Personal',
     tags: '',
+    recurrence: 'NONE',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +50,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false })
       due_date: dueDateValue,
       category: parsedData.category || 'Personal',
       tags: parsedData.tags || '',
+      recurrence: parsedData.recurrence || 'NONE',
     });
   };
 
@@ -70,6 +72,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false })
         due_date: '',
         category: 'Personal',
         tags: '',
+        recurrence: 'NONE',
       });
       onTaskCreated();
     } catch (err: any) {
@@ -184,6 +187,26 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated, inSidebar = false })
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Comma-separated tags"
             />
+          </div>
+
+          {/* Phase 5: Recurrence Dropdown */}
+          <div>
+            <label htmlFor="recurrence" className="block text-sm font-medium text-slate-300 mb-1">
+              Repeat
+            </label>
+            <select
+              id="recurrence"
+              name="recurrence"
+              value={formData.recurrence || 'NONE'}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="NONE">No Repeat</option>
+              <option value="DAILY">Daily</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="MONTHLY">Monthly</option>
+              <option value="YEARLY">Yearly</option>
+            </select>
           </div>
         </div>
 
