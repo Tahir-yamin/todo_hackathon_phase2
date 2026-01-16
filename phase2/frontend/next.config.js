@@ -3,10 +3,11 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
+        // Proxy all /api requests EXCEPT /api/auth (handled by Better-Auth locally)
+        source: '/api/((?!auth).*)',
         destination: process.env.NEXT_PUBLIC_API_URL
-          ? `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`
-          : 'http://backend-service:8000/api/:path*', // Internal K8s DNS fallback
+          ? `${process.env.NEXT_PUBLIC_API_URL}/api/$1`
+          : 'http://backend-service:8000/api/$1', // Internal K8s DNS fallback
       },
     ];
   },
