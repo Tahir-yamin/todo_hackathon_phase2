@@ -111,6 +111,9 @@ jobs:
         with:
           context: ./phase2/frontend
           push: true
+          build-args: |
+            NEXTpublic_API_URL=http://localhost:30001
+            NEXT_PUBLIC_APP_URL=http://localhost:30000
           tags: |
             ${{ secrets.ACR_LOGIN_SERVER }}/todo-frontend:${{ steps.meta.outputs.frontend_tag }}
             ${{ secrets.ACR_LOGIN_SERVER }}/todo-frontend:latest
