@@ -61,7 +61,8 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
         try {
             // Use demo user ID to match task list (for hackathon demo)
             const userId = session.user.id;
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${userId}/chat`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            const response = await fetch(`${apiUrl}/api/${userId}/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

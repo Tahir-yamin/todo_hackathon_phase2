@@ -42,8 +42,8 @@ export default function ChatPage() {
         setLoading(true);
 
         try {
-            const token = localStorage.getItem('auth_token');
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/${session.user.id}/chat`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            const response = await fetch(`${apiUrl}/api/${session.user.id}/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

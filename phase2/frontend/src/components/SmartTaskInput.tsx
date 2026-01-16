@@ -25,7 +25,8 @@ export const SmartTaskInput: React.FC<SmartTaskInputProps> = ({ onParse }) => {
         setError(null);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai/parse-task`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            const response = await fetch(`${apiUrl}/api/ai/parse-task`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
