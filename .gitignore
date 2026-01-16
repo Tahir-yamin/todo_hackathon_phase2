@@ -75,3 +75,29 @@ scheduler.zip
 daprd.zip
 data/
 81
+
+# Build and deployment scripts (local use only)
+BUILD_V*.ps1
+ANTIGRAVITY_REINSTALL_GUIDE.md
+Demo Doc.md
+
+# Kubernetes config files (environment-specific)
+*-svc.yaml
+services.yaml
+configmap-update.yaml
+
+# Phase 5 temporary files
+phase2/backend/PHASE5_API_UPDATE.py
+
+# Build and deployment scripts (local use only)
+BUILD_V*.ps1
+ANTIGRAVITY_REINSTALL_GUIDE.md
+Demo Doc.md
+
+# Kubernetes config files (environment-specific)
+*-svc.yaml
+services.yaml
+configmap-update.yaml
+
+# Phase 5 temporary files
+phase2/backend/PHASE5_API_UPDATE.py
