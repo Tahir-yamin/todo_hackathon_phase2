@@ -25,3 +25,5 @@ export interface TaskFormData {
   tags?: string;
   recurrence?: string;  // Phase 5
 }
+
+// Force rebuild - 2026-01-16
