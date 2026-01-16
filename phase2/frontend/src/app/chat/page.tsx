@@ -42,6 +42,7 @@ export default function ChatPage() {
         setLoading(true);
 
         try {
+            const token = localStorage.getItem('auth_token');
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
             const response = await fetch(`${apiUrl}/api/${session.user.id}/chat`, {
                 method: 'POST',
