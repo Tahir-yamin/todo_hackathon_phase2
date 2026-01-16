@@ -112,7 +112,7 @@ jobs:
           context: ./phase2/frontend
           push: true
           build-args: |
-            NEXT_PUBLIC_API_URL=http://backend-service:8000
+            NEXT_PUBLIC_API_URL=http://134.33.248.45:8000
             NEXT_PUBLIC_APP_URL=http://128.203.86.119:3000
           tags: |
             ${{ secrets.ACR_LOGIN_SERVER }}/todo-frontend:${{ steps.meta.outputs.frontend_tag }}
