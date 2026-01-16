@@ -176,7 +176,7 @@ frontend:
   livenessProbe:
     enabled: true
     path: /
-    initialDelaySeconds: 30
+    initialDelaySeconds: 60
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 3
@@ -184,10 +184,10 @@ frontend:
   readinessProbe:
     enabled: true
     path: /
-    initialDelaySeconds: 10
+    initialDelaySeconds: 30
     periodSeconds: 5
-    timeoutSeconds: 3
-    failureThreshold: 3
+    timeoutSeconds: 5
+    failureThreshold: 6
   
   # Autoscaling (HPA)
   autoscaling:
