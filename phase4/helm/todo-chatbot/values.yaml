@@ -241,8 +241,9 @@ notificationService:
 config:
   # Frontend configuration
   NEXT_PUBLIC_API_URL: "http://backend-service:8000"
-  NEXT_PUBLIC_APP_URL: "http://localhost:3000"
-  BETTER_AUTH_URL: "http://localhost:3000"
+  NEXT_PUBLIC_APP_URL: "http://128.203.86.119:3000"
+  BETTER_AUTH_URL: "http://128.203.86.119:3000"
+  AUTH_TRUST_HOST: "true"
   
   # Backend configuration
   DATABASE_URL: "postgresql://postgres:postgres@db-service:5432/tododb"
