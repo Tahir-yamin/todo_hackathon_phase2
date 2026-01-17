@@ -6,13 +6,11 @@ from sqlmodel import Session, select
 from models import Task, User
 from db import get_session
 
-# Phase 5: Import event publishing module
+# Phase 5: Import lightweight event publishing
 try:
-    from events import (
-        publish_task_event, schedule_reminder, schedule_reminder_job,
-        cancel_reminder_job, EventType
-    )
+    from simple_events import publish_task_event, EventType
     EVENTS_ENABLED = True
+    print("✅ Lightweight event bus loaded")
 except ImportError:
     print("⚠️ Events module not available - running without event publishing")
     EVENTS_ENABLED = False
