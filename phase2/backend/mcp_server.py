@@ -189,6 +189,32 @@ class MCPServer:
                     }
                 }
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "bulk_delete_tasks",
+                    "description": "Delete multiple tasks at once. Use this when user asks to 'delete all tasks', 'delete open tasks', 'delete completed tasks', or similar bulk delete operations. Can filter by status, priority, or category.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "status": {
+                                "type": "string",
+                                "enum": ["todo", "in_progress", "completed"],
+                                "description": "Filter: only delete tasks with this status. 'Open tasks' means status='todo' or 'in_progress'"
+                            },
+                            "priority": {
+                                "type": "string",
+                                "enum": ["low", "medium", "high"],
+                                "description": "Filter: only delete tasks with this priority"
+                            },
+                            "category": {
+                                "type": "string",
+                                "description": "Filter: only delete tasks with this category"
+                            }
+                        }
+                    }
+                }
+            },
             # Phase 5: New tool for reminders
             {
                 "type": "function",
@@ -231,8 +257,10 @@ class MCPServer:
                 return await self._update_task(session, arguments, user_id)
             elif tool_name == "delete_task":
                 return await self._delete_task(session, arguments, user_id)
-            elif tool_name == "bulk_complete_tasks":
+            elif tool_name == \"bulk_complete_tasks\":
                 return await self._bulk_complete_tasks(session, user_id)
+            elif tool_name == "bulk_delete_tasks":
+                return await self._bulk_delete_tasks(session, arguments, user_id)
             elif tool_name == "set_reminder":
                 return await self._set_reminder(session, arguments, user_id)
             else:
@@ -491,6 +519,73 @@ class MCPServer:
                 "success": True,
                 "count": len(tasks),
                 "message": f"Successfully marked {len(tasks)} tasks as completed"
+            }
+        except Exception as e:
+            session.rollback()
+            raise
+    
+    async def _bulk_delete_tasks(self, session: Session, args: dict, user_id: str) -> dict:
+        """Delete multiple tasks based on filters"""
+        try:
+            # Build query for tasks to delete
+            statement = select(Task).where(Task.user_id == user_id)
+            
+            # Apply filters
+            if args.get("status"):
+                statement = statement.where(Task.status == args["status"])
+            if args.get("priority"):
+                statement = statement.where(Task.priority == args["priority"])
+            if args.get("category"):
+                statement = statement.where(Task.category == args["category"])
+            
+            # If no filters specified and user says "open tasks", default to todo + in_progress
+            # This is handled by the AI system prompt telling it to use status filter
+            
+            tasks = session.exec(statement).all()
+            
+            if len(tasks) == 0:
+                return {
+                    "success": True,
+                    "count": 0,
+                    "message": "No tasks matched the criteria to delete"
+                }
+            
+            # Store task info before deletion for event publishing
+            task_info = [{"id": t.id, "title": t.title} for t in tasks]
+            
+            # Delete all matched tasks
+            for task in tasks:
+                session.delete(task)
+            
+            session.commit()
+            
+            print(f"✅ Bulk deleted {len(tasks)} tasks for user {user_id}")
+            
+            # Phase 5: Publish events and cancel reminders for deleted tasks
+            if EVENTS_ENABLED:
+                for info in task_info:
+                    await publish_task_event(
+                        EventType.DELETED,
+                        info,
+                        user_id
+                    )
+                    await cancel_reminder_job(info["id"])
+            
+            # Build descriptive message based on filters
+            filter_desc = []
+            if args.get("status"):
+                filter_desc.append(f"status '{args['status']}'")
+            if args.get("priority"):
+                filter_desc.append(f"{args['priority']} priority")
+            if args.get("category"):
+                filter_desc.append(f"category '{args['category']}'")
+            
+            filter_text = " with " + ", ".join(filter_desc) if filter_desc else ""
+            
+            return {
+                "success": True,
+                "count": len(tasks),
+                "message": f"Successfully deleted {len(tasks)} task(s){filter_text}"
             }
         except Exception as e:
             session.rollback()
