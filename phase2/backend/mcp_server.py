@@ -369,9 +369,10 @@ class MCPServer:
                     "priority": t.priority,
                     "status": t.status,
                     "category": t.category,
-                    "due_date": getattr(t, 'due_date', None).isoformat() if getattr(t, 'due_date', None) else None,
-                    "remind_at": getattr(t, 'remind_at', None).isoformat() if getattr(t, 'remind_at', None) else None,
-                    "recurrence_type": getattr(t, 'recurrence_type', None),
+                    "due_date": t.due_date.isoformat() if t.due_date else None,
+                    "remind_at": t.remind_at.isoformat() if t.remind_at else None,
+                    "recurrence": t.recurrence if hasattr(t, 'recurrence') else "NONE",
+                    "next_occurrence": t.next_occurrence.isoformat() if hasattr(t, 'next_occurrence') and t.next_occurrence else None,
                     "created_at": t.created_at.isoformat() if t.created_at else None
                 }
                 for t in tasks
@@ -383,7 +384,7 @@ class MCPServer:
                 markdown_table += "|-------|----------|--------|----------|\\n"
                 for t in tasks:
                     title = t.title[:30] + "..." if len(t.title) > 30 else t.title
-                    due_date = getattr(t, 'due_date', None)
+                    due_date = t.due_date if hasattr(t, 'due_date') else None
                     due = due_date.strftime("%b %d") if due_date else "N/A"
                     markdown_table += f"| {title} | {t.priority} | {t.status} | {due} |\\n"
                 formatted_message = f"Found {len(tasks)} task(s):\\n\\n{markdown_table}"
