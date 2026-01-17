@@ -4,9 +4,9 @@ description: Index of all available workflows for troubleshooting and developmen
 
 # Workflows Index
 
-**Total Workflows**: 25  
+**Total Workflows**: 27  
 **Location**: `.agent/workflows/`  
-**Last Updated**: January 10, 2026
+**Last Updated**: January 17, 2026
 
 ---
 
@@ -88,6 +88,16 @@ description: Index of all available workflows for troubleshooting and developmen
 **Use when**: Planning your 2025 learning journey  
 **Includes**: Roadmap execution, deep dive steps, learning projects  
 **Special**: Guides you from "Practitioner" to "Architect" level
+
+### 21. [Chat Testing](./chat-testing.md) 💬
+**Use when**: Testing chat widget functionality, MCP tools, AI responses  
+**Includes**: 20 comprehensive test cases for all chat operations  
+**Coverage**: Add tasks, list/filter, update, delete, bulk operations
+
+### 22. [Phase 5 Chat Completion](./phase5-chat-completion.md) 🎯
+**Use when**: Reference for Phase 5 chat widget implementation  
+**Includes**: Complete timeline, bugs fixed, deployment process, lessons learned  
+**Special**: Full documentation of bulk_delete_tasks implementation
 
 ---
 
