@@ -57,7 +57,7 @@ task_functions = [
             "type": "object",
             "properties": {
                 "task_id": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "The ID of the task to complete"
                 }
             },
@@ -71,7 +71,7 @@ task_functions = [
             "type": "object",
             "properties": {
                 "task_id": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "The ID of the task to delete"
                 }
             },
@@ -85,7 +85,7 @@ task_functions = [
             "type": "object",
             "properties": {
                 "task_id": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "The ID of the task to update"
                 },
                 "title": {
@@ -147,22 +147,38 @@ async def execute_function(function_name: str, args: dict, user_id: str, db: Ses
             if status_filter != "all":
                 query = query.where(Task.status == status_filter)
             
-            tasks = db.exec(query).all()
+            # Use .unique() to avoid duplicate results when joining (though no join here yet)
+            # Use .all() to execute
+            # tasks = db.exec(query).all()
+            # If using SQLAlchemy core select, db.exec returns objects in a sequence
             
-            return {
-                "success": True,
-                "count": len(tasks),
-                "tasks": [
-                    {
-                        "id": t.id,
+            results = db.exec(query).all()
+            
+            try:
+                task_list = []
+                for t in results:
+                    # Debug print to pod logs
+                    print(f"DEBUG TASK OBJECT: {type(t)} - {t}")
+                    task_list.append({
+                        "id": str(t.id),
                         "title": t.title,
                         "status": t.status,
                         "priority": t.priority,
                         "completed": t.status == "completed"
-                    }
-                    for t in tasks
-                ]
-            }
+                    })
+                    
+                return {
+                    "success": True,
+                    "count": len(task_list),
+                    "tasks": task_list
+                }
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return {
+                    "success": False,
+                    "error": f"Error processing task list: {str(e)}"
+                }
         
         elif function_name == "complete_task":
             # Mark task as completed
