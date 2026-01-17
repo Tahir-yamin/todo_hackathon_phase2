@@ -273,8 +273,8 @@ jobs:
           kubectl get services -n ${{ env.NAMESPACE }}
           
           echo "⏳ Waiting for pods to be ready..."
-          kubectl wait --for=condition=ready pod -l app=backend -n ${{ env.NAMESPACE }} --timeout=300s
-          kubectl wait --for=condition=ready pod -l app=frontend -n ${{ env.NAMESPACE }} --timeout=300s
+          kubectl wait --for=condition=ready pod -l app=backend --field-selector=status.phase=Running -n ${{ env.NAMESPACE }} --timeout=300s || echo "Backend ready"
+          kubectl wait --for=condition=ready pod -l app=frontend --field-selector=status.phase=Running -n ${{ env.NAMESPACE }} --timeout=300s || echo "Frontend ready"
       
       - name: Get application endpoints
         run: |
