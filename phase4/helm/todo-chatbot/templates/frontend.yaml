@@ -36,6 +36,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-config
+            - secretRef:
+                name: {{ .Release.Name }}-secrets
           env:
             - name: PORT
               value: {{ .Values.frontend.env.PORT | quote }}

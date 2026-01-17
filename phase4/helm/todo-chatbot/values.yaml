@@ -266,9 +266,9 @@ secrets:
   # Default: "your_gemini_key_here"
   geminiApiKey: eW91cl9nZW1pbmlfa2V5X2hlcmU=
   
-  # OPENROUTER_API_KEY - Alternative AI
-  # Default: "your_openrouter_key_here"
-  openrouterApiKey: eW91cl9vcGVucm91dGVyX2tleV9oZXJl
+  # OPENROUTER_API_KEY - Alternative AI  
+  # Valid key: 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
+  openrouterApiKey: c2stb3ItdjEtNDVjNGRhMjc4YjljODUyZmIzMTE1MjAxMjg4YjRmMjFmOTIxYzlhMjlmYjdiOGJhZTI2YzgyNTEzZGM0MzViNg==
 
 # ========== Ingress Configuration (Optional) ==========
 ingress:

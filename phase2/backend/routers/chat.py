@@ -202,7 +202,7 @@ async def chat_with_ai(
                 final_message = "Action completed successfully."
         else:
             # No tool calls, use direct response
-            final_message = response_message.content
+            final_message = assistant_message.content
         
         # Final safety check for empty responses
         if not final_message or final_message.strip() == "":
