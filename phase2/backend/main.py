@@ -26,6 +26,30 @@ async def lifespan(app: FastAPI):
     SQLModel.metadata.create_all(engine)
     print("✅ All database tables created/verified")
     print("✅ Database connection established")
+    
+    # Phase 5: Setup zero-cost features
+    try:
+        from simple_events import event_bus
+        from audit_logging import setup_audit_logging
+        from websocket_sync import setup_websocket_sync
+        from dapr_integration import setup_dapr_integration, setup_dapr_subscriptions
+        
+        # 1. PostgreSQL Audit Logging (zero-cost)
+        database_url = os.getenv("DATABASE_URL")
+        if database_url:
+            setup_audit_logging(database_url, event_bus)
+        
+        # 2. WebSocket Real-Time Sync (zero-cost)
+        setup_websocket_sync(app, event_bus)
+        
+        # 3. Dapr Pub/Sub Integration (zero-cost - uses existing sidecar)
+        setup_dapr_integration(event_bus)
+        setup_dapr_subscriptions(app)
+        
+        print("🎉 Phase 5: All zero-cost features initialized!")
+    except Exception as e:
+        print(f"⚠️ Phase 5 features not loaded: {e}")
+    
     yield
 
 
