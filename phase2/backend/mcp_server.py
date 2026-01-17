@@ -338,15 +338,20 @@ class MCPServer:
             if args.get("category"):
                 statement = statement.where(Task.category == args["category"])
             
-            # Phase 5: Advanced filters
-            if args.get("due_before"):
-                due_before = datetime.fromisoformat(args["due_before"].replace("Z", "+00:00"))
-                statement = statement.where(Task.due_date <= due_before)
-            if args.get("due_after"):
-                due_after = datetime.fromisoformat(args["due_after"].replace("Z", "+00:00"))
-                statement = statement.where(Task.due_date >= due_after)
-            if args.get("has_recurrence"):
-                statement = statement.where(Task.recurrence_type != None)
+            
+            # Phase 5: Advanced filters (skip if columns don't exist)
+            try:
+                if args.get("due_before"):
+                    due_before = datetime.fromisoformat(args["due_before"].replace("Z", "+00:00"))
+                    statement = statement.where(Task.due_date <= due_before)
+                if args.get("due_after"):
+                    due_after = datetime.fromisoformat(args["due_after"].replace("Z", "+00:00"))
+                    statement = statement.where(Task.due_date >= due_after)
+                if args.get("has_recurrence"):
+                    statement = statement.where(Task.recurrence_type != None)
+            except AttributeError:
+                # Phase 5 columns don't exist in database, skip advanced filters
+                pass
             
             # Phase 5: Sorting
             sort_by = args.get("sort_by", "created_at")
@@ -364,9 +369,9 @@ class MCPServer:
                     "priority": t.priority,
                     "status": t.status,
                     "category": t.category,
-                    "due_date": t.due_date.isoformat() if t.due_date else None,
-                    "remind_at": t.remind_at.isoformat() if t.remind_at else None,
-                    "recurrence_type": t.recurrence_type,
+                    "due_date": getattr(t, 'due_date', None).isoformat() if getattr(t, 'due_date', None) else None,
+                    "remind_at": getattr(t, 'remind_at', None).isoformat() if getattr(t, 'remind_at', None) else None,
+                    "recurrence_type": getattr(t, 'recurrence_type', None),
                     "created_at": t.created_at.isoformat() if t.created_at else None
                 }
                 for t in tasks
@@ -378,7 +383,8 @@ class MCPServer:
                 markdown_table += "|-------|----------|--------|----------|\\n"
                 for t in tasks:
                     title = t.title[:30] + "..." if len(t.title) > 30 else t.title
-                    due = t.due_date.strftime("%b %d") if t.due_date else "N/A"
+                    due_date = getattr(t, 'due_date', None)
+                    due = due_date.strftime("%b %d") if due_date else "N/A"
                     markdown_table += f"| {title} | {t.priority} | {t.status} | {due} |\\n"
                 formatted_message = f"Found {len(tasks)} task(s):\\n\\n{markdown_table}"
             else:
