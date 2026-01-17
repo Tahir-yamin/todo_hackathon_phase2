@@ -264,8 +264,8 @@ class MCPServer:
                 category=args.get("category", "Personal"),
                 status="todo",
                 due_date=due_date,
-                remind_at=remind_at,
-                recurrence_type=args.get("recurrence_type"),
+                # remind_at=remind_at, # Field not in model
+                recurrence=args.get("recurrence_type", "NONE"), # Map input to model field
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow()
             )
@@ -328,7 +328,6 @@ class MCPServer:
             
             tasks = session.exec(statement).all()
             
-            task_list = [
                 {
                     "id": t.id,
                     "title": t.title,
@@ -337,8 +336,9 @@ class MCPServer:
                     "status": t.status,
                     "category": t.category,
                     "due_date": t.due_date.isoformat() if t.due_date else None,
-                    "remind_at": t.remind_at.isoformat() if t.remind_at else None,
-                    "recurrence_type": t.recurrence_type,
+                    # remind_at field not in current model
+                    #"remind_at": t.remind_at.isoformat() if getattr(t, "remind_at", None) else None,
+                    "recurrence": t.recurrence, # Fixed from recurrence_type
                     "created_at": t.created_at.isoformat() if t.created_at else None
                 }
                 for t in tasks
