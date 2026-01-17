@@ -47,6 +47,13 @@ spec:
               value: {{ .Values.backend.env.PORT | quote }}
             - name: HOST
               value: {{ .Values.backend.env.HOST | quote }}
+            # OpenRouter API Key from Kubernetes Secret (secure)
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openrouter-secret
+                  key: api-key
+                  optional: false
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           {{- if .Values.backend.livenessProbe.enabled }}
