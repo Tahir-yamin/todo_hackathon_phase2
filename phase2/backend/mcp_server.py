@@ -257,7 +257,7 @@ class MCPServer:
                 return await self._update_task(session, arguments, user_id)
             elif tool_name == "delete_task":
                 return await self._delete_task(session, arguments, user_id)
-            elif tool_name == \"bulk_complete_tasks\":
+            elif tool_name == "bulk_complete_tasks":
                 return await self._bulk_complete_tasks(session, user_id)
             elif tool_name == "bulk_delete_tasks":
                 return await self._bulk_delete_tasks(session, arguments, user_id)
