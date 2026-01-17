@@ -240,7 +240,7 @@ notificationService:
 # ========== Configuration (ConfigMap) ==========
 config:
   # Frontend configuration
-  NEXT_PUBLIC_API_URL: "http://backend-service:8000"
+  NEXT_PUBLIC_API_URL: ""  # Empty = use relative paths, Next.js rewrites to backend-service:8000
   NEXT_PUBLIC_APP_URL: "http://128.203.86.119:3000"
   BETTER_AUTH_URL: "http://128.203.86.119:3000"
   AUTH_TRUST_HOST: "true"
