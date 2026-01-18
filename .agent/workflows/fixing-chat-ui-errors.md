@@ -46,7 +46,26 @@ Write-Host "Success: $($response.success)"
 
 ---
 
-## Step 3: Check Backend Logs for MCP Errors
+## Step 3: Verify Backend Image Version
+
+```bash
+# Check deployed image tag
+kubectl get deployment todo-chatbot-backend -n todo-chatbot -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# Check latest commit with fix
+git log --oneline | grep -E "remind_at|async|await" | head -3
+```
+
+**Expected**: Image tag should contain commit SHA with your fix
+
+**If OLD image deployed**:
+- GitHub Actions may still be building
+- Or CI/CD didn't trigger
+- Force trigger: `git commit --allow-empty -m "chore: Deploy" && git push`
+
+---
+
+## Step 4: Check Backend Logs for MCP Errors
 
 ```bash
 # Get backend pod name
@@ -60,10 +79,11 @@ kubectl logs $POD -n todo-chatbot -c backend --tail=200 | grep -i "tool\|error\|
 - `Tool execution error: ...` → Actual error message
 - `AttributeError` → Missing field (see fix below)
 - `TypeError: object can't be used in 'await'` → Async/await issue
+- `could not translate host name` → Database connection issue
 
 ---
 
-## Step 4: Test Chat Endpoint Directly
+## Step 5: Test Chat Endpoint Directly
 
 ```powershell
 // turbo
@@ -95,7 +115,7 @@ Write-Host "Tool calls: $($response.tool_calls)"
 
 ---
 
-## Step 5: Common MCP Tool Bugs
+## Step 6: Common MCP Tool Bugs
 
 ### Bug: AttributeError on Optional Fields
 
@@ -148,7 +168,7 @@ await publish_event(data)  # Wrong!
 
 ---
 
-## Step 6: Test Locally Before Deploying
+## Step 7: Test Locally Before Deploying
 
 ```bash
 # Navigate to backend
@@ -164,7 +184,7 @@ python -c "from mcp_server import mcp; print('✅ MCP OK'); print(f'Tools: {len(
 
 ---
 
-## Step 7: Verify Markdown Rendering (Frontend)
+## Step 8: Verify Markdown Rendering (Frontend)
 
 If tasks show as raw markdown instead of formatted tables:
 
@@ -187,7 +207,7 @@ npm install react-markdown remark-gfm
 
 ---
 
-## Step 8: Check OpenRouter API Key
+## Step 9: Check OpenRouter API Key
 
 If chat completely fails:
 

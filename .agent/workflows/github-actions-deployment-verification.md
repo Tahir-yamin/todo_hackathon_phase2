@@ -155,6 +155,18 @@ echo ""
 
 **Verify**: Image tag matches your Git commit SHA
 
+**If image is OLD**:
+```bash
+# Check latest commit
+git log -1 --format="%h %s"
+
+# If deployed image != latest commit:
+# Option 1: Wait for GitHub Actions to finish
+# Option 2: Force trigger CI/CD:
+git commit --allow-empty -m "chore: Force CI/CD deployment"
+git push origin main
+```
+
 ---
 
 ## Step 9: Check Resource Usage
@@ -181,18 +193,65 @@ kubectl top nodes
 - [ ] Look for `Events:` section
 - [ ] Common: ImagePullBackOff → Check ACR credentials
 - [ ] Common: Pending → Use optimized CPU values
+- [ ] Check: `kubectl get pods -n todo-chatbot` for status
 
 ### Backend Returns 500 Errors
 
 - [ ] Check backend logs for Python exceptions
 - [ ] Verify database connection
 - [ ] Check MCP server imports: `kubectl exec ... -- python -c "from mcp_server import mcp"`
+- [ ] **NEW**: Check if backend in CrashLoopBackOff
+- [ ] **NEW**: Verify database service name (should match DATABASE_URL)
+
+### Backend CrashLoopBackOff
+
+**Common Causes**:
+1. **Database connection failure**
+   ```bash
+   # Check logs for:
+   kubectl logs <pod> -n todo-chatbot -c backend | grep "could not translate"
+   
+   # Fix: Verify service name
+   kubectl get svc -n todo-chatbot
+   # Should have: postgres or db-service
+   ```
+
+2. **Wrong DATABASE_URL**
+   ```bash
+   kubectl get configmap backend-config -n todo-chatbot -o yaml | grep DATABASE
+   # Should match actual service name
+   ```
+
+### Old Image Deployed
+
+**Symptom**: Code changes not reflected
+
+**Check**:
+```bash
+# Get deployed image
+kubectl get deployment todo-chatbot-backend -n todo-chatbot -o jsonpath='{.spec.template.spec.containers[0].image}'
+
+# Compare to latest commit
+git log -1 --oneline
+```
+
+**Fix**:
+```bash
+# Force GitHub Actions to rebuild
+git commit --allow-empty -m "chore: Trigger deployment"
+git push origin main
+
+# Wait ~12 minutes for CI/CD
+# Then verify rollout:
+kubectl rollout status deployment/todo-chatbot-backend -n todo-chatbot
+```
 
 ### AI Chat Not Working
 
 - [ ] See workflow: `/fixing-chat-ui-errors`
 - [ ] Check backend logs for "Tool execution error"
 - [ ] Verify OpenRouter API key in secrets
+- [ ] **NEW**: Verify image tag has latest fixes
 
 ---
 
