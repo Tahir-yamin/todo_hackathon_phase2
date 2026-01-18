@@ -369,7 +369,7 @@ class MCPServer:
                     "status": t.status,
                     "category": t.category,
                     "due_date": t.due_date.isoformat() if t.due_date else None,
-                    "remind_at": t.remind_at.isoformat() if t.remind_at else None,
+                    "remind_at": t.remind_at.isoformat() if hasattr(t, 'remind_at') and t.remind_at else None,
                     "recurrence": t.recurrence if hasattr(t, 'recurrence') else "NONE",
                     "next_occurrence": t.next_occurrence.isoformat() if hasattr(t, 'next_occurrence') and t.next_occurrence else None,
                     "created_at": t.created_at.isoformat() if t.created_at else None
