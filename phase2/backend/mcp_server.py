@@ -8,7 +8,7 @@ from db import get_session
 
 # Phase 5: Import lightweight event publishing
 try:
-    from simple_events import publish_task_event, EventType
+    from simple_events import publish_task_event, EventType, schedule_reminder_job, cancel_reminder_job
     EVENTS_ENABLED = True
     print("✅ Lightweight event bus loaded")
 except ImportError:

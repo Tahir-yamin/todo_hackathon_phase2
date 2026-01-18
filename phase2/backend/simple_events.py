@@ -96,4 +96,17 @@ def setup_audit_logging(db_session):
     for event_type in ["TASK_CREATED", "TASK_UPDATED", "TASK_COMPLETED", "TASK_DELETED"]:
         event_bus.subscribe(event_type, log_to_database)
 
+# Helper functions for reminder scheduling (stubs for now)
+async def schedule_reminder_job(task_id: str, remind_at, user_id: str):
+    """Schedule a reminder job (stub implementation)"""
+    # TODO: Integrate with Dapr Jobs API or alternative scheduler
+    print(f"📅 Reminder scheduled for task {task_id} at {remind_at}")
+    pass
+
+async def cancel_reminder_job(task_id: str):
+    """Cancel a scheduled reminder job (stub implementation)"""
+    # TODO: Integrate with Dapr Jobs API or alternative scheduler
+    print(f"🚫 Reminder cancelled for task {task_id}")
+    pass
+
 print("✅ Lightweight event bus initialized (zero-cost)")
