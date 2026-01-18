@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-kafka-config
+  namespace: todo-chatbot
+data:
+  KAFKA_ENABLED: "true"
+  KAFKA_BROKERS: "todo-kafka-kafka-brokers.kafka.svc.cluster.local:9092"

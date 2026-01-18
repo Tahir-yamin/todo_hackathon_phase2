@@ -7,6 +7,14 @@ import traceback
 from db import get_session
 from models import Task, TaskCreate, TaskUpdate, User  # Import User model
 
+# Phase 5: Kafka event publishing
+from kafka_producer import (
+    publish_task_created,
+    publish_task_updated,
+    publish_task_deleted,
+    publish_task_completed
+)
+
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 def ensure_demo_user(session: Session, user_id: str) -> User:
@@ -107,6 +115,9 @@ def create_task(
         session.commit()
         session.refresh(task)
         
+        # Phase 5: Publish Kafka event
+        publish_task_created(task.dict())
+        
         return {"success": True, "data": task, "message": "Task created successfully"}
     except Exception as e:
         import traceback
@@ -137,6 +148,9 @@ def update_task(
     session.commit()
     session.refresh(task)
     
+    # Phase 5: Publish Kafka event
+    publish_task_updated(task.dict())
+    
     return {"success": True, "data": task}
 
 @router.delete("/{id}")
@@ -147,11 +161,42 @@ def delete_task(
     task = session.get(Task, id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-        
+    
+    # Store task data before deletion for event publishing
+    task_id = task.id
+    user_id = task.user_id
+    
     session.delete(task)
     session.commit()
     
+    # Phase 5: Publish Kafka event
+    publish_task_deleted(task_id, user_id)
+    
     return {"success": True, "message": "Task deleted"}
+
+@router.post("/{id}/complete")
+def complete_task(
+    id: str,
+    session: Session = Depends(get_session)
+):
+    """Mark task as complete - triggers recurring task creation via Kafka"""
+    task = session.get(Task, id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    # Mark as completed
+    task.status = "completed"
+    task.updated_at = datetime.utcnow()
+    
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+    
+    # Phase 5: Publish event (recurring service will handle next occurrence)
+    publish_task_completed(task.dict())
+    
+    return {"success": True, "data": task, "message": "Task completed"}
+
 
 @router.post("/bulk-complete")
 def bulk_complete_tasks(

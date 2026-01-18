@@ -42,6 +42,9 @@ spec:
                 name: {{ .Release.Name }}-config
             - secretRef:
                 name: {{ .Release.Name }}-secrets
+            # Phase 5: Kafka configuration
+            - configMapRef:
+                name: backend-kafka-config
           env:
             - name: PORT
               value: {{ .Values.backend.env.PORT | quote }}
