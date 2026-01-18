@@ -311,8 +311,9 @@ class MCPServer:
                 )
                 
                 # Schedule reminder if set
-                if remind_at:
-                    await schedule_reminder_job(task.id, remind_at, user_id)
+                # TODO: Implement Dapr Jobs API for reminders
+                # if remind_at:
+                #     await schedule_reminder_job(task.id, remind_at, user_id)
             
             return {
                 "success": True,
@@ -443,9 +444,10 @@ class MCPServer:
                 )
                 
                 # Update reminder if changed
-                if task.remind_at:
-                    await cancel_reminder_job(task.id)
-                    await schedule_reminder_job(task.id, task.remind_at, user_id)
+                # TODO: Implement Dapr Jobs API for reminders
+                # if task.remind_at:
+                #     await cancel_reminder_job(task.id)
+                #     await schedule_reminder_job(task.id, task.remind_at, user_id)
             
             return {
                 "success": True,
@@ -481,7 +483,8 @@ class MCPServer:
                     {"id": task_id, "title": title},
                     user_id
                 )
-                await cancel_reminder_job(task_id)
+                # TODO: Implement Dapr Jobs API for reminders
+                # await cancel_reminder_job(task_id)
             
             return {
                 "success": True,
@@ -621,9 +624,10 @@ class MCPServer:
             print(f"✅ Set reminder for task: {task.title} at {remind_at}")
             
             # Schedule reminder via Dapr Jobs API
+            # TODO: Implement Dapr Jobs API for reminders
             if EVENTS_ENABLED:
-                await cancel_reminder_job(task_id)  # Cancel existing
-                await schedule_reminder_job(task_id, remind_at, user_id)
+                # await cancel_reminder_job(task_id)  # Cancel existing
+                # await schedule_reminder_job(task_id, remind_at, user_id)
                 await publish_task_event(
                     EventType.REMINDER_SET,
                     {"id": task.id, "title": task.title, "remind_at": remind_at_str},
