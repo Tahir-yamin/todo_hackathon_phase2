@@ -245,16 +245,18 @@ jobs:
           
           echo "✅ ACR secret created"
       
-      - name: Deploy with Helm
         run: |
           helm upgrade --install todo-chatbot ./phase4/helm/todo-chatbot \
             --namespace ${{ env.NAMESPACE }} \
+            --values ./phase4/helm/todo-chatbot/values-optimized-cpu.yaml \
             --set backend.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/todo-backend \
             --set backend.image.tag=${{ needs.build.outputs.backend_tag }} \
             --set frontend.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/todo-frontend \
             --set frontend.image.tag=${{ needs.build.outputs.frontend_tag }} \
             --set notificationService.image.repository=${{ secrets.ACR_LOGIN_SERVER }}/notification-service \
             --set notificationService.image.tag=${{ needs.build.outputs.notification_tag }} \
+            --set notificationService.enabled=false \
+            --set notificationService.replicaCount=0 \
             --set global.registry=${{ secrets.ACR_LOGIN_SERVER }}
           
           echo "✅ Helm deployment initiated"
