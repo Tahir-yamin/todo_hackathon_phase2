@@ -74,7 +74,14 @@ export function ChatWidget({ onTaskUpdated }: ChatWidgetProps = {}) {
                 })
             });
 
+            // Validate response before parsing JSON
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+            }
+
             const data = await response.json();
+
 
             if (!conversationId) {
                 setConversationId(data.conversation_id);
