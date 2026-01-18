@@ -304,7 +304,7 @@ class MCPServer:
             
             # Phase 5: Publish event
             if EVENTS_ENABLED:
-                await publish_task_event(
+                publish_task_event(
                     EventType.CREATED,
                     {"id": task.id, "title": task.title, "priority": task.priority},
                     user_id
@@ -437,7 +437,7 @@ class MCPServer:
             
             # Phase 5: Publish event
             if EVENTS_ENABLED:
-                await publish_task_event(
+                publish_task_event(
                     EventType.UPDATED,
                     {"id": task.id, "title": task.title, "status": task.status},
                     user_id
@@ -478,7 +478,7 @@ class MCPServer:
             
             # Phase 5: Publish event and cancel reminder
             if EVENTS_ENABLED:
-                await publish_task_event(
+                publish_task_event(
                     EventType.DELETED,
                     {"id": task_id, "title": title},
                     user_id
@@ -517,7 +517,7 @@ class MCPServer:
             # Phase 5: Publish events for each completed task
             if EVENTS_ENABLED:
                 for task in tasks:
-                    await publish_task_event(
+                    publish_task_event(
                         EventType.COMPLETED,
                         {"id": task.id, "title": task.title},
                         user_id
@@ -572,7 +572,7 @@ class MCPServer:
             # Phase 5: Publish events and cancel reminders for deleted tasks
             if EVENTS_ENABLED:
                 for info in task_info:
-                    await publish_task_event(
+                    publish_task_event(
                         EventType.DELETED,
                         info,
                         user_id
@@ -628,7 +628,7 @@ class MCPServer:
             if EVENTS_ENABLED:
                 # await cancel_reminder_job(task_id)  # Cancel existing
                 # await schedule_reminder_job(task_id, remind_at, user_id)
-                await publish_task_event(
+                publish_task_event(
                     EventType.REMINDER_SET,
                     {"id": task.id, "title": task.title, "remind_at": remind_at_str},
                     user_id
