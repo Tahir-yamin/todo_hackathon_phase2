@@ -1,0 +1,69 @@
+# ===============================================
+# CPU-Optimized Values for Single-Node AKS Cluster
+# Based on Dapr Official Documentation for Small Clusters
+# ===============================================
+# Apply with: helm upgrade todo-chatbot ./todo-chatbot -n todo-chatbot -f values-optimized-cpu.yaml
+
+# ========== Global Configuration ==========
+global:
+  registry: tahirtodo123.azurecr.io
+
+# ========== Database - Reduce CPU Requests ==========
+database:
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"  # Reduced from 250m
+    limits:
+      memory: "512Mi"
+      # NO CPU LIMIT - allow bursting
+
+# ========== Backend - Optimized for Dapr Sidecar ==========
+backend:
+  replicaCount: 1
+  image:
+    repository: tahirtodo123.azurecr.io/todo-backend
+    tag: "20260118140042-ac1e2dd"  # Current deployed version with MCP fix
+  resources:
+    requests:
+      memory: "192Mi"  # Reduced from 256Mi
+      cpu: "100m"      # Reduced from 250m (Dapr sidecar handles I/O)
+    limits:
+      memory: "384Mi"  # Reduced from 512Mi
+      # NO CPU LIMIT - allow bursting
+  
+  # Dapr Sidecar Resource Configuration (via annotations)
+  dapr:
+    sidecar:
+      cpuRequest: "100m"   # Dapr recommended starting point
+      cpuLimit: "300m"     # Dapr recommended starting point
+      memoryRequest: "128Mi"
+      memoryLimit: "256Mi"
+
+# ========== Frontend - Reduced  Requests ==========
+frontend:
+  replicaCount: 1
+  image:
+    repository: tahirtodo123.azurecr.io/todo-frontend
+    tag: "20260118140042-ac1e2dd"  # Current deployed version
+  resources:
+    requests:
+      memory: "192Mi"  # Reduced from 256Mi
+      cpu: "100m"      # Reduced from 250m
+    limits:
+      memory: "384Mi"  # Reduced from 512Mi
+      # NO CPU LIMIT - allow bursting
+
+# ========== Notification Service - DISABLED for CPU Savings ==========
+notificationService:
+  enabled: false  # Disable to free up CPU
+  replicaCount: 0  # No pods
+
+# ========== Global Resource Defaults ==========
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "50m"   # Reduced from default
+  limits:
+    memory: "128Mi"
+    # NO CPU LIMIT by default
