@@ -29,6 +29,8 @@ A comprehensive todo management application that evolved from a simple console a
 
 ---
 
+https://github.com/user-attachments/assets/d4261c66-7bb4-4ea3-b75b-c7ba16ee91cf
+
 ## ⚡ Features
 
 ### Core Functionality (Phase I-II)
